@@ -1,9 +1,8 @@
 import { Socket, DefaultEventsMap } from "socket.io";
+import { Request } from "express";
 
-declare namespace Express {
-  export interface Request {
-    user?: string | jwt.JwtPayload;
-  }
+export interface IRequestWithUser extends Request {
+  user?: string | jwt.JwtPayload;
 }
 
 export type socketType = Socket<
