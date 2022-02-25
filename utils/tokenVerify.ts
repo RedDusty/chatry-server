@@ -1,0 +1,21 @@
+import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+
+const tokenVerify = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+
+    jwt.verify(token, "kr41kffsda", (err, user) => {
+      if (err) return res.send(401).send("Token is not valid");
+      req.user = user;
+
+      next();
+    });
+  } else {
+    res.status(401).json("You are not authenticated");
+  }
+};
+
+export default tokenVerify;
