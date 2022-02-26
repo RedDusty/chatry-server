@@ -16,6 +16,9 @@ const serviceAccount = {
   clientX509CertUrl: process.env.FB_CLIENT_X509_CERT_URL,
 } as admin.ServiceAccount;
 
+console.log(serviceAccount);
+
+
 const firebaseConfig = {
   apiKey: process.env.FB_API_KEY,
   appId: process.env.FB_APP_ID,
