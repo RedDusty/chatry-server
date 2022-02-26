@@ -71,7 +71,8 @@ const loginSystem = (email: string, password: string, res: Response) => {
             httpOnly: process.env.NODE_ENV === "dev" ? false : true,
             expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
             domain: process.env.domainURL,
-            sameSite: false,
+            sameSite: "none",
+            secure: true,
           })
           .cookie("refreshToken", refreshTokenCrypt, {
             httpOnly: process.env.NODE_ENV === "dev" ? false : true,
@@ -79,7 +80,8 @@ const loginSystem = (email: string, password: string, res: Response) => {
               new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 10
             ),
             domain: process.env.domainURL,
-            sameSite: false,
+            sameSite: "none",
+            secure: true,
           })
           .cookie("uid", userCred.user.uid, {
             httpOnly: process.env.NODE_ENV === "dev" ? false : true,
@@ -87,7 +89,8 @@ const loginSystem = (email: string, password: string, res: Response) => {
               new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 10
             ),
             domain: process.env.domainURL,
-            sameSite: false,
+            sameSite: "none",
+            secure: true,
           })
           .json(userInfo as UserType);
       } else {
