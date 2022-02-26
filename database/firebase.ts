@@ -3,21 +3,11 @@ import "dotenv/config";
 import { FirebaseOptions, initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
-const serviceAccount = {
-  type: process.env.FB_TYPE,
-  projectId: process.env.FB_PROJECT_ID,
-  privateKeyId: process.env.FB_PRIVATE_KEY_ID,
-  privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/, "\n"),
-  clientEmail: process.env.FB_CLIENT_EMAIL,
-  clientId: process.env.FB_CLIENT_ID,
-  authUrl: process.env.FB_AUTH_URI,
-  tokenUrl: process.env.FB_TOKEN_URI,
-  authProviderX509CertUrl: process.env.FB_AUTH_PROVIDER_X509_CERT_URL,
-  clientX509CertUrl: process.env.FB_CLIENT_X509_CERT_URL,
-} as admin.ServiceAccount;
+const serviceAccount = JSON.parse(
+  process.env.FB_SERVICE_ACCOUNT!
+) as admin.ServiceAccount;
 
-console.log(serviceAccount);
-
+serviceAccount.privateKey = serviceAccount.privateKey?.replace(/\\n/, "\n");
 
 const firebaseConfig = {
   apiKey: process.env.FB_API_KEY,
