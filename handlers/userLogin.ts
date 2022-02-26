@@ -70,14 +70,22 @@ const loginSystem = (email: string, password: string, res: Response) => {
           .cookie("accessToken", accessTokenCrypt, {
             httpOnly: false,
             expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
+            domain: process.env.clientURL,
           })
           .cookie("refreshToken", refreshTokenCrypt, {
             httpOnly: false,
             expires: new Date(
               new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 10
             ),
+            domain: process.env.clientURL,
           })
-          .cookie("uid", userCred.user.uid)
+          .cookie("uid", userCred.user.uid, {
+            httpOnly: false,
+            expires: new Date(
+              new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 10
+            ),
+            domain: process.env.clientURL,
+          })
           .json(userInfo as UserType);
       } else {
         res.status(400).send("UNKNOWN_ERROR");
