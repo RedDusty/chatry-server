@@ -68,23 +68,23 @@ const loginSystem = (email: string, password: string, res: Response) => {
         res
           .status(200)
           .cookie("accessToken", accessTokenCrypt, {
-            httpOnly: false,
+            httpOnly: process.env.NODE_ENV === "dev" ? false : true,
             expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
-            domain: process.env.clientURL,
+            domain: process.env.domainURL,
           })
           .cookie("refreshToken", refreshTokenCrypt, {
-            httpOnly: false,
+            httpOnly: process.env.NODE_ENV === "dev" ? false : true,
             expires: new Date(
               new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 10
             ),
-            domain: process.env.clientURL,
+            domain: process.env.domainURL,
           })
           .cookie("uid", userCred.user.uid, {
-            httpOnly: false,
+            httpOnly: process.env.NODE_ENV === "dev" ? false : true,
             expires: new Date(
               new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 10
             ),
-            domain: process.env.clientURL,
+            domain: process.env.domainURL,
           })
           .json(userInfo as UserType);
       } else {
