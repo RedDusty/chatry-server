@@ -1,8 +1,8 @@
 import { randomUUID } from "crypto";
-import { fbApp, fbFirestore, fbStorage } from "database/firebase";
+import { fbApp, fbFirestore, fbStorage } from "@database/firebase";
 import { Request, Response } from "express";
 import { Stream } from "stream";
-import userCheck from "utils/userCheck";
+import userCheck from "@utils/userCheck";
 import { UploadedFile } from "express-fileupload";
 import { Buffer } from "buffer";
 

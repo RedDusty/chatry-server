@@ -1,4 +1,4 @@
-import { UserShortType } from "typings/User";
+import { UserShortType } from "@typings/User";
 
 type MessageFileType = string | File;
 

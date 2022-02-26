@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { decryptData } from "./cryptData";
+import { decryptData } from "@utils/cryptData";
 
 export default async function userCheck(req: Request, res: Response) {
   const uid: string = req.cookies.uid;

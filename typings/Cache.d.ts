@@ -1,5 +1,5 @@
-import { ChatType, MessagesType } from "typings/Messenger";
-import { UserType } from "typings/User";
+import { ChatType, MessagesType } from "@typings/Messenger";
+import { UserType } from "@typings/User";
 
 type UsersCacheType = {
   userUID: string;

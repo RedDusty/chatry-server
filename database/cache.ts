@@ -1,17 +1,17 @@
-import { CacheType } from "typings/Cache";
+import { CacheType } from "@typings/Cache";
 import {
   editUser,
   getUser,
   notificationsAddUser,
   notificationsGetUser,
   searchUser,
-} from "database/handlers/UserHandler";
+} from "@database/handlers/UserHandler";
 import {
   addUserChat,
   createChat,
   getChat,
   sendMessage,
-} from "./handlers/MessengerHandler";
+} from "@database/handlers/MessengerHandler";
 
 export const cache: CacheType = {
   chats: [],

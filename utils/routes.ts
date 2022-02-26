@@ -1,14 +1,14 @@
-import { cache } from "database/cache";
-import { searchChat } from "database/handlers/MessengerHandler";
-import { getUser, searchUser } from "database/handlers/UserHandler";
+import { cache } from "@database/cache";
+import { searchChat } from "@database/handlers/MessengerHandler";
+import { getUser, searchUser } from "@database/handlers/UserHandler";
 import express, { Request, Response } from "express";
-import tokenRefresh from "handlers/tokenRefresh";
-import userAvatar from "handlers/userAvatar";
-import userLogin from "handlers/userLogin";
-import userRegister from "handlers/userRegister";
-import userVerify from "handlers/userVerify";
-import { UserType } from "typings/User";
-import removeKey from "utils/removeKey";
+import tokenRefresh from "@handlers/tokenRefresh";
+import userAvatar from "@handlers/userAvatar";
+import userLogin from "@handlers/userLogin";
+import userRegister from "@handlers/userRegister";
+import userVerify from "@handlers/userVerify";
+import { UserType } from "@typings/User";
+import removeKey from "@utils/removeKey";
 
 export const expressRoutes = express.Router();
 

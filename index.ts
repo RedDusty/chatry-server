@@ -1,8 +1,9 @@
+require("module-alias/register");
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import http from "http";
-import { expressRoutes } from "routes";
+import { expressRoutes } from "@utils/routes";
 import cookieParser from "cookie-parser";
 import expressFileupload from "express-fileupload";
 import { Server } from "socket.io";
@@ -12,12 +13,12 @@ import {
   friendAccept,
   friendRequest,
   removeOnlineUser,
-} from "database/handlers/UserHandler";
+} from "@database/handlers/UserHandler";
 import {
   createChat,
   inviteUserChat,
   sendMessage,
-} from "database/handlers/MessengerHandler";
+} from "@database/handlers/MessengerHandler";
 
 const PORT = Number(process.env.PORT || 8000);
 

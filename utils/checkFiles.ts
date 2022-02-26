@@ -1,4 +1,4 @@
-import { MessageFileType } from "typings/Messenger";
+import { MessageFileType } from "@typings/Messenger";
 
 const checkFiles = (files: MessageFileType[] | undefined) => {
   if (files) {

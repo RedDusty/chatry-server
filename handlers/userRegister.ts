@@ -1,10 +1,10 @@
-import { fbAuth, fbFirestore } from "database/firebase";
+import { fbAuth, fbFirestore } from "@database/firebase";
 import { Request, Response } from "express";
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import "dotenv/config";
-import sendEmailVerify from "utils/sendEvailVerify";
-import { getDatabase } from "database/cache";
-import { InfoUserType, notificationsType, UserType } from "typings/User";
+import sendEmailVerify from "@utils/sendEvailVerify";
+import { getDatabase } from "@database/cache";
+import { InfoUserType, notificationsType, UserType } from "@typings/User";
 
 const userRegister = async (req: Request, res: Response) => {
   const { email, password, username } = req.body;

@@ -1,12 +1,12 @@
 import { sign } from "crypto";
-import { getDatabase } from "database/cache";
-import { fbAuth } from "database/firebase";
+import { getDatabase } from "@database/cache";
+import { fbAuth } from "@database/firebase";
 import { Request, Response } from "express";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 import jwt from "jsonwebtoken";
-import { tokensType, UserType } from "typings/User";
-import { decryptData, encryptData } from "utils/cryptData";
+import { tokensType, UserType } from "@typings/User";
+import { decryptData, encryptData } from "@utils/cryptData";
 
 const userLogin = (req: Request, res: Response) => {
   let { email, password } = req.body;

@@ -1,8 +1,8 @@
-import { cache } from "database/cache";
-import { fbFirestore } from "database/firebase";
-import { ChatType, MessageType } from "typings/Messenger";
-import checkFiles from "utils/checkFiles";
-import { getUser, notificationsAddUser } from "database/handlers/UserHandler";
+import { cache } from "@database/cache";
+import { fbFirestore } from "@database/firebase";
+import { ChatType, MessageType } from "@typings/Messenger";
+import checkFiles from "@utils/checkFiles";
+import { getUser, notificationsAddUser } from "@database/handlers/UserHandler";
 
 export const createChat = (usersUID: string[]) => {
   const chatDoc = fbFirestore.collection("chats").doc();

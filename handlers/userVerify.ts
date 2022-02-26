@@ -1,4 +1,4 @@
-import { fbAuth } from "database/firebase";
+import { fbAuth } from "@database/firebase";
 import { Request, Response } from "express";
 
 const userVerify = async (req: Request, res: Response) => {

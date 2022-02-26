@@ -6,9 +6,20 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "node build/index.js",
+    "start": "node -r tsconfig-paths/register -r ts-node/register ./build/index.js",
     "dev": "nodemon index.ts",
-    "build": "tsc --project ./"
+    "build": "tsc --project ."
+  },
+  "nodemonConfig": {
+    "ignore": [
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "."
+    ],
+    "exec": "node -r tsconfig-paths/register -r ts-node/register ./index.ts",
+    "ext": "js, ts"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
@@ -36,16 +47,5 @@
     "ts-node": "^10.5.0",
     "tsconfig-paths": "^3.12.0",
     "typescript": "^4.5.5"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      ".git",
-      "node_modules"
-    ],
-    "watch": [
-      "."
-    ],
-    "exec": "node -r tsconfig-paths/register -r ts-node/register ./index.ts",
-    "ext": "js, ts"
   }
 }

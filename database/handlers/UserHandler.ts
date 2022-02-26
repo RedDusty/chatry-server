@@ -1,7 +1,7 @@
 import { socketType } from "custom";
-import { cache } from "database/cache";
-import { fbFirestore } from "database/firebase";
-import { notificationsType, UserShortType, UserType } from "typings/User";
+import { cache } from "@database/cache";
+import { fbFirestore } from "@database/firebase";
+import { notificationsType, UserShortType, UserType } from "@typings/User";
 
 export const getUser = async <K extends keyof UserType>(
   key: K,
