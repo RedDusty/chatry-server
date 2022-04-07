@@ -9,7 +9,7 @@ type tokensType = {
 
 type notificationsType = {
   header: string;
-  data: string;
+  data: string | any;
   time: number;
 };
 
@@ -23,6 +23,8 @@ export type UserType = {
   tokens: tokensType;
   registerDate: number;
   friendsUID: string[];
+  ignoresUID: string[];
+  waitingsUID: string[];
   subname: string;
   verified: boolean;
   socketID?: string;

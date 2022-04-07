@@ -6,15 +6,13 @@ import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 import jwt from "jsonwebtoken";
 import { tokensType, UserType } from "@typings/User";
-import { decryptData, encryptData } from "@utils/cryptData";
 
 const userLogin = (req: Request, res: Response) => {
   let { email, password } = req.body;
-  const cookieAccessToken = req.cookies.accessToken;
-  // const cookieRefreshToken = req.cookies.refreshToken;
+  const accessToken = String(req.headers.authorization);
 
   if (!email && !password) {
-    silentLogin(cookieAccessToken, req, res);
+    silentLogin(accessToken, req, res);
     return;
   } else {
     loginSystem(email, password, res);
@@ -47,52 +45,22 @@ const loginSystem = (email: string, password: string, res: Response) => {
         userCred.user.uid
       );
 
-      const accessTokenCrypt = encryptData(accessToken, userCred.user.uid);
-      const refreshTokenCrypt = encryptData(refreshToken, userCred.user.uid);
-
       const userInfo = await getDatabase().getUser("email", email);
       if (userInfo) {
         userInfo.tokens = {
-          accessToken,
-          refreshToken,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
         };
         userInfo.online = true;
       }
 
       getDatabase().editUser(userCred.user.uid, "tokens", {
-        refreshToken: refreshToken,
-        accessToken: accessToken,
+        accessToken,
+        refreshToken,
       } as tokensType);
 
       if (userInfo) {
-        res
-          .status(200)
-          .cookie("accessToken", accessTokenCrypt, {
-            httpOnly: process.env.NODE_ENV === "dev" ? false : true,
-            expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
-            domain: process.env.domainURL,
-            sameSite: "none",
-            secure: true,
-          })
-          .cookie("refreshToken", refreshTokenCrypt, {
-            httpOnly: process.env.NODE_ENV === "dev" ? false : true,
-            expires: new Date(
-              new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 10
-            ),
-            domain: process.env.domainURL,
-            sameSite: "none",
-            secure: true,
-          })
-          .cookie("uid", userCred.user.uid, {
-            httpOnly: process.env.NODE_ENV === "dev" ? false : true,
-            expires: new Date(
-              new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 10
-            ),
-            domain: process.env.domainURL,
-            sameSite: "none",
-            secure: true,
-          })
-          .json(userInfo as UserType);
+        res.status(200).json(userInfo as UserType);
       } else {
         res.status(400).send("UNKNOWN_ERROR");
       }
@@ -120,12 +88,10 @@ const loginSystem = (email: string, password: string, res: Response) => {
   return;
 };
 
-const silentLogin = (accessToken: any, req: Request, res: Response) => {
-  const uid: string = req.cookies.uid;
+const silentLogin = (accessToken: string, req: Request, res: Response) => {
+  const token = jwt.decode(accessToken) as any;
 
-  if (uid) {
-    const token = jwt.decode(decryptData(accessToken, uid)) as any;
-
+  try {
     const email = token.email;
     const password = token.password;
 
@@ -133,8 +99,11 @@ const silentLogin = (accessToken: any, req: Request, res: Response) => {
       loginSystem(email, password, res);
       return;
     }
-  }
 
-  res.status(401).send("ACCESS_TOKEN_INVALID");
-  return;
+    res.status(401).send("ACCESS_TOKEN_INVALID");
+    return;
+  } catch (error) {
+    res.status(401).send("ACCESS_TOKEN_INVALID");
+    return;
+  }
 };

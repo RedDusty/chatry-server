@@ -1,7 +1,8 @@
-import { socketType } from "custom";
+import { ioType } from "custom";
 import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
 import { notificationsType, UserShortType, UserType } from "@typings/User";
+import userShortObj from "@utils/userShortObj";
 
 export const getUser = async <K extends keyof UserType>(
   key: K,
@@ -60,91 +61,218 @@ export const searchUser = async <K extends keyof UserType>(
   return users;
 };
 
-export const friendRequest = async (
-  userSendUID: string,
-  userGetUID: string
+// FRIEND REQUEST HANDLERS START
+
+export const friendRequestSend = async (
+  io: ioType,
+  userSenderUID: string,
+  userReceiverUID: string
 ) => {
-  const userGet = await getUser("uid", userGetUID);
+  const userSender = await getUser("uid", userSenderUID);
 
-  const userSend = await getUser("uid", userSendUID);
+  const userReceiver = await getUser("uid", userReceiverUID);
+  
+  if (userSender && userReceiver) {
+    if (userReceiver.ignoresUID.indexOf(userSender.uid!) !== -1) {
+      console.warn("warning - UserHandler.ts [77]");
+      return false;
+    }
 
-  if (userGet && userSend) {
+    const newWaitingList = userReceiver.waitingsUID || [];
+    newWaitingList.push(userSender.uid!);
+    editUser(userReceiver.uid!, "waitingsUID", newWaitingList);
     const notif = {
       time: new Date().getTime(),
       header: "Friend request",
-      data: userGetUID,
+      data: {
+        avatar: userSender.avatar,
+        displayName: userSender.displayName,
+        online: userSender.online,
+        uid: userSender.uid,
+      } as UserShortType,
     } as notificationsType;
-    notificationsAddUser(userGet.uid!, notif);
+    const userIndex = cache.users.findIndex(
+      (u) => u.userUID === userReceiver.uid
+    );
+    if (userIndex !== -1) {
+      io.to(cache.users[userIndex].socketID).emit("FRIEND_REQUEST_CLIENT", {
+        header: "RECEIVE",
+        user: userShortObj(userSender),
+      });
+    }
+    notificationsAddUser(
+      userSender.uid!,
+      notif,
+      io,
+      "FRIEND_REQUEST_CLIENT_NOTIF"
+    );
   }
 };
 
-export const friendAccept = async (userSendUID: string, userGetUID: string) => {
-  const userGet = await getUser("uid", userGetUID);
+export const friendAccept = async (
+  io: ioType,
+  userSenderUID: string,
+  userReceiverUID: string
+) => {
+  const userReceiver = await getUser("uid", userReceiverUID);
 
-  const userSend = await getUser("uid", userSendUID);
+  const userSender = await getUser("uid", userSenderUID);
 
-  if (userGet && userSend) {
+  if (userReceiver && userSender) {
+    const newWaitingList = (userReceiver.waitingsUID || []).filter(
+      (u) => u !== userSender.uid!
+    );
+    editUser(userReceiver.uid!, "waitingsUID", newWaitingList);
     const notif = {
       time: new Date().getTime(),
       header: "Friend request accepted",
-      data: userSendUID,
+      data: {
+        avatar: userSender.avatar,
+        displayName: userSender.displayName,
+        online: userSender.online,
+        uid: userSender.uid,
+      } as UserShortType,
     } as notificationsType;
-    notificationsAddUser(userSend.uid!, notif);
-    // friendAddUser(userSend, userGet);
-    // friendAddUser(userGet, userSend);
+    const userIndex = cache.users.findIndex(
+      (u) => u.userUID === userReceiver.uid
+    );
+    if (userIndex !== -1) {
+      io.to(cache.users[userIndex].socketID).emit("FRIEND_REQUEST_CLIENT", {
+        header: "ACCEPT",
+        user: userShortObj(userSender),
+      });
+    }
+    notificationsAddUser(
+      userSender.uid!,
+      notif,
+      io,
+      "FRIEND_REQUEST_CLIENT_NOTIF"
+    );
+    friendAddUser(io, userSender, userReceiver);
+    friendAddUser(io, userReceiver, userSender);
   }
 };
 
 export const friendDecline = async (
-  userSendUID: string,
-  userGetUID: string
+  io: ioType,
+  userSenderUID: string,
+  userReceiverUID: string
 ) => {
-  const userGet = await getUser("uid", userGetUID);
+  const userReceiver = await getUser("uid", userReceiverUID);
 
-  const userSend = await getUser("uid", userSendUID);
+  const userSender = await getUser("uid", userSenderUID);
 
-  if (userGet && userSend) {
+  if (userReceiver && userSender) {
+    const newWaitingList = (userReceiver.waitingsUID || []).filter(
+      (u) => u !== userSender.uid!
+    );
+    editUser(userReceiver.uid!, "waitingsUID", newWaitingList);
     const notif = {
       time: new Date().getTime(),
       header: "Friend request declined",
-      data: userSendUID,
+      data: {
+        avatar: userSender.avatar,
+        displayName: userSender.displayName,
+        online: userSender.online,
+        uid: userSender.uid,
+      } as UserShortType,
     } as notificationsType;
-    notificationsAddUser(userSend.uid!, notif);
+    const userIndex = cache.users.findIndex(
+      (u) => u.userUID === userReceiver.uid
+    );
+    if (userIndex !== -1) {
+      io.to(cache.users[userIndex].socketID).emit("FRIEND_REQUEST_CLIENT", {
+        header: "DECLINE",
+        user: userShortObj(userSender),
+      });
+    }
+    notificationsAddUser(
+      userSender.uid!,
+      notif,
+      io,
+      "FRIEND_REQUEST_CLIENT_NOTIF"
+    );
   }
 };
 
-// export const friendAddUser = async (userSend: UserType, userGet: UserType) => {
-//   if (userGet && userSend) {
-//     userGet.friendsUID.push(userSend.uid!);
-//   }
-// };
+export const friendAddUser = async (
+  io: ioType,
+  firstUser: UserType,
+  secondUser: UserType
+) => {
+  if (firstUser && secondUser) {
+    const newFriendsUID = firstUser.friendsUID;
+    newFriendsUID.push(secondUser.uid!);
+    editUser(firstUser.uid!, "friendsUID", newFriendsUID);
+    const userIndex = cache.users.findIndex((u) => u.userUID === firstUser.uid);
+    if (userIndex !== -1) {
+      io.to(cache.users[userIndex].socketID).emit("FRIEND_REQUEST_CLIENT", {
+        header: "ADD",
+        user: secondUser.uid,
+      });
+    }
+  }
+};
 
-// export const friendRemoveUser = async (
-//   userSendUID: string,
-//   userGetUID: string
-// ) => {
-//   const userGet = await getUser("uid", userGetUID);
+export const friendRemoveUser = async (
+  io: ioType,
+  userSenderUID: string,
+  userReceiverUID: string
+) => {
+  const userReceiver = await getUser("uid", userReceiverUID);
 
-//   const userSend = await getUser("uid", userSendUID);
+  const userSender = await getUser("uid", userSenderUID);
 
-//   if (userSend) {
-//     userSend.friendsUID = userSend.friendsUID.filter(
-//       (uids) => uids !== userGetUID
-//     );
-//   }
+  if (userSender) {
+    const newFriendsUID = userSender.friendsUID;
+    newFriendsUID.filter((u) => u !== userReceiverUID);
+    editUser(userSender.uid!, "friendsUID", newFriendsUID);
+    const userIndex = cache.users.findIndex(
+      (u) => u.userUID === userSender.uid
+    );
+    if (userIndex !== -1) {
+      io.to(cache.users[userIndex].socketID).emit("FRIEND_REQUEST_CLIENT", {
+        header: "REMOVE",
+        user: userShortObj(userReceiver, userReceiverUID),
+      });
+    }
+  }
 
-//   if (userGet) {
-//     userGet.friendsUID = userGet.friendsUID.filter(
-//       (uids) => uids !== userSendUID
-//     );
-//     const notif = {
-//       time: new Date().getTime(),
-//       header: "Friend removed",
-//       data: userGetUID,
-//     } as notificationsType;
-//     notificationsAddUser(userGet.uid!, notif);
-//   }
-// };
+  if (userReceiver) {
+    const newFriendsUID = userReceiver.friendsUID;
+    newFriendsUID.filter((u) => u !== userReceiverUID);
+    editUser(userReceiver.uid!, "friendsUID", newFriendsUID);
+    const notif = {
+      time: new Date().getTime(),
+      header: "Friend removed",
+      data: userSender
+        ? ({
+            avatar: userSender.avatar,
+            displayName: userSender.displayName,
+            online: userSender.online,
+            uid: userSender.uid,
+          } as UserShortType)
+        : userSenderUID,
+    } as notificationsType;
+    const userIndex = cache.users.findIndex(
+      (u) => u.userUID === userReceiver.uid
+    );
+    if (userIndex !== -1) {
+      io.to(cache.users[userIndex].socketID).emit("FRIEND_REQUEST_CLIENT", {
+        header: "REMOVE",
+        user: userShortObj(userSender, userSenderUID),
+      });
+    }
+    notificationsAddUser(
+      userReceiver.uid!,
+      notif,
+      io,
+      "FRIEND_REQUEST_CLIENT_NOTIF"
+    );
+  }
+};
+
+// FRIEND REQUEST HANDLERS END
 
 export const notificationsGetUser = async (
   userUID: string,
@@ -173,7 +301,9 @@ export const notificationsGetUser = async (
 
 export const notificationsAddUser = async (
   userUID: string,
-  notification: notificationsType
+  notification: notificationsType,
+  io?: ioType,
+  ioEvent?: string
 ) => {
   const notifCol = await fbFirestore
     .collection("Info_Users")
@@ -183,6 +313,15 @@ export const notificationsAddUser = async (
   notification.time = new Date().getTime();
 
   notifCol.add(notification);
+
+  if (io && ioEvent) {
+    const userIndex = cache.users.findIndex((u) => u.userUID === userUID);
+    if (userIndex !== -1) {
+      console.log("a");
+
+      io.to(cache.users[userIndex].socketID).emit(ioEvent, notification);
+    }
+  }
 };
 
 export const editUser = async <K extends keyof UserType>(

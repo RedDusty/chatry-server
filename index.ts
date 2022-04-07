@@ -9,8 +9,6 @@ import { Server } from "socket.io";
 import csrf from "csurf";
 import {
   addOnlineUser,
-  friendAccept,
-  friendRequest,
   removeOnlineUser,
 } from "@database/handlers/UserHandler";
 import {
@@ -18,6 +16,7 @@ import {
   inviteUserChat,
   sendMessage,
 } from "@database/handlers/MessengerHandler";
+import friendRequest from "@handlers/friendRequest";
 
 const PORT = Number(process.env.PORT || 8000);
 
@@ -30,11 +29,11 @@ const corsConfig = {
   credentials: true,
 };
 
-const csrfProtection = csrf({
-  cookie: {
-    httpOnly: true,
-  },
-});
+// const csrfProtection = csrf({
+//   cookie: {
+//     httpOnly: true,
+//   },
+// });
 
 app.use(cors(corsConfig));
 app.use(
@@ -62,8 +61,9 @@ export const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("FRIEND_REQUEST", friendRequest);
-  socket.on("FRIEND_ACCEPT", friendAccept);
+  socket.on("FRIEND_REQUEST", (data) => {
+    friendRequest(data);
+  });
   socket.on("MESSAGE_SEND", sendMessage);
   socket.on("CREATE_CHAT", createChat);
   socket.on("INVITE_CHAT", inviteUserChat);

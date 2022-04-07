@@ -1,6 +1,10 @@
 import { cache } from "@database/cache";
 import { searchChat } from "@database/handlers/MessengerHandler";
-import { getUser, searchUser } from "@database/handlers/UserHandler";
+import {
+  getUser,
+  notificationsGetUser,
+  searchUser,
+} from "@database/handlers/UserHandler";
 import express, { Request, Response } from "express";
 import tokenRefresh from "@handlers/tokenRefresh";
 import userAvatar from "@handlers/userAvatar";
@@ -9,6 +13,8 @@ import userRegister from "@handlers/userRegister";
 import userVerify from "@handlers/userVerify";
 import { UserType } from "@typings/User";
 import removeKey from "@utils/removeKey";
+import friendRequest from "@handlers/friendRequest";
+import userCheck from "@utils/userCheck";
 
 export const expressRoutes = express.Router();
 
@@ -19,6 +25,8 @@ expressRoutes.post("/api/refresh", tokenRefresh);
 expressRoutes.get("/api/verify", userVerify);
 
 expressRoutes.post("/api/avatar", userAvatar);
+
+expressRoutes.post("/api/friendRequest", friendRequest);
 
 expressRoutes.get("/api/user", async (req: Request, res: Response) => {
   const userUID = req.query.uid;
@@ -32,7 +40,7 @@ expressRoutes.get("/api/user", async (req: Request, res: Response) => {
       user = removeKey(user, "userSettings");
       user = removeKey(user, "socketID");
       user = removeKey(user, "email");
-      user.online = isOnline !== -1 ? true : user.online
+      user.online = isOnline !== -1 ? true : user.online;
 
       res.status(200).json(user);
       return;
@@ -71,4 +79,19 @@ expressRoutes.get("/api/search/chats", async (req: Request, res: Response) => {
   } else {
     res.status(404).send("NOT_FOUND");
   }
+});
+
+expressRoutes.get("/api/notifications", async (req: Request, res: Response) => {
+  const userUID = await userCheck(req, res);
+
+  console.log(userUID);
+  
+
+  if (userUID) {
+    const notifs = await notificationsGetUser(userUID);
+
+    res.status(200).json(notifs);
+  }
+
+  res.status(404).send("NOT_FOUND");
 });
