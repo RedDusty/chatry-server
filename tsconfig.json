@@ -104,6 +104,11 @@
       "@handlers/*": ["./handlers/*"],
       "@typings/*": ["./typings/*"],
       "@utils/*": ["./utils/*"],
-    }
+    },
+    "plugins": [
+      {
+          "transform": "@zerollup/ts-transform-paths",
+      }
+    ]
   }
 }
