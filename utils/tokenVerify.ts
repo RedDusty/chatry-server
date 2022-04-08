@@ -10,9 +10,10 @@ const tokenVerify = (
   const authHeader = req.headers.authorization;
 
   if (authHeader) {
+    const uid = authHeader.split(" ")[0];
     const token = authHeader.split(" ")[1];
 
-    jwt.verify(token, "kr41kffsda", (err, user) => {
+    jwt.verify(token, uid, (err, user) => {
       if (err) return res.send(401).send("Token is not valid");
       req.user = user;
 

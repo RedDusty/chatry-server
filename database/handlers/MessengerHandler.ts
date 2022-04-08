@@ -2,7 +2,8 @@ import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
 import { ChatType, MessageType } from "@typings/Messenger";
 import checkFiles from "@utils/checkFiles";
-import { getUser, notificationsAddUser } from "@database/handlers/UserHandler";
+import { notificationsAddUser } from "@database/handlers/UserHandler";
+import { getUserDB } from "@database/handlers/getUserDB";
 
 export const createChat = (usersUID: string[]) => {
   const chatDoc = fbFirestore.collection("chats").doc();
@@ -77,7 +78,7 @@ export const addChat = async (chat: ChatType) => {
 
 export const addUserChat = async (chatID: string, userUID: string) => {
   const chat = await getChat(chatID);
-  const user = await getUser("uid", userUID);
+  const user = await getUserDB("uid", userUID);
 
   if (chat && user) {
     if (chat.chatType === "public") {
@@ -103,9 +104,9 @@ export const inviteUserChat = async (
   userSendUID: string,
   userGetUID: string
 ) => {
-  const userGet = await getUser("uid", userGetUID);
+  const userGet = await getUserDB("uid", userGetUID);
 
-  const userSend = await getUser("uid", userSendUID);
+  const userSend = await getUserDB("uid", userSendUID);
 
   const chat = await getChat(chatID);
 

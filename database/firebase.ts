@@ -35,5 +35,3 @@ export const fbFirestore = admin.firestore(fbApp);
 export const fbDatabase = admin.database(fbApp);
 
 export const fbStorage = admin.storage(fbApp);
-
-export const fbAuth = admin.auth(fbApp);

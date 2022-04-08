@@ -2,11 +2,6 @@ type UserSettingsType = {
   theme: "white" | "dark";
 };
 
-type tokensType = {
-  accessToken: string;
-  refreshToken: string;
-};
-
 type notificationsType = {
   header: string;
   data: string | any;
@@ -14,13 +9,12 @@ type notificationsType = {
 };
 
 export type UserType = {
-  displayName: string;
+  username: string;
   email: string;
-  uid: string | null;
+  uid: string;
   avatar: string | null;
   online: true | number;
   userSettings: UserSettingsType;
-  tokens: tokensType;
   registerDate: number;
   friendsUID: string[];
   ignoresUID: string[];
@@ -28,14 +22,19 @@ export type UserType = {
   subname: string;
   verified: boolean;
   socketID?: string;
+  banned: boolean;
 };
 
 export type InfoUserType = {
   ip: string[];
+  subname: string;
+  password: string;
+  uid: string;
+  refreshToken: string;
 };
 
 export type UserShortType = {
-  displayName: string;
+  username: string;
   uid: string;
   online: true | number;
   avatar: string | null;

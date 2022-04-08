@@ -1,11 +1,8 @@
-import {
-  friendAccept,
-  friendDecline,
-  friendRemoveUser,
-  friendRequestSend,
-} from "@database/handlers/UserHandler";
-import { socketType } from "custom";
 import { io } from "index";
+import { friendRemoveUser } from "./friendRemoveUser";
+import { friendAccept } from "./friendAccept";
+import { friendDecline } from "./friendRequestDecline";
+import { friendRequestSend } from "./friendRequestSend";
 
 type requestTypeType = "add" | "remove" | "accept" | "decline";
 

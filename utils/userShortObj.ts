@@ -7,14 +7,14 @@ export default function userShortObj(
   if (user) {
     return {
       avatar: user.avatar,
-      displayName: user.displayName,
+      username: user.username,
       online: user.online,
       uid: user.uid,
     } as UserShortType;
   } else {
     return {
       avatar: null,
-      displayName: "DELETED",
+      username: "DELETED",
       online: 0,
       uid: uid,
     } as UserShortType;

@@ -2,14 +2,15 @@ import { randomUUID } from "crypto";
 import { fbApp, fbFirestore, fbStorage } from "@database/firebase";
 import { Request, Response } from "express";
 import { Stream } from "stream";
-import userCheck from "@utils/userCheck";
 import { UploadedFile } from "express-fileupload";
 import { Buffer } from "buffer";
+import { getUserDB } from "@database/handlers/getUserDB";
 
 export default async function userAvatar(req: Request, res: Response) {
   try {
+    const uid = req.headers.authorization?.split(" ")[0] || "";
     const blob = (req.files!.avatar as UploadedFile).data;
-    
+
     let base64 = blob.toString();
 
     if (base64.includes("jpeg") || base64.includes("webp")) {
@@ -18,9 +19,10 @@ export default async function userAvatar(req: Request, res: Response) {
       base64 = base64.substring(19);
     }
 
-    const userUID = await userCheck(req, res);
+    const user = await getUserDB("uid", uid);
 
-    if (userUID) {
+    if (user) {
+      const userUID = user.uid;
       try {
         const stream = new Stream.PassThrough();
         stream.end(Buffer.from(base64, "base64"));

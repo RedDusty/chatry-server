@@ -1,10 +1,9 @@
 import { CacheType } from "@typings/Cache";
 import {
+  editInfoUser,
   editUser,
-  getUser,
   notificationsAddUser,
   notificationsGetUser,
-  searchUser,
 } from "@database/handlers/UserHandler";
 import {
   addUserChat,
@@ -12,6 +11,8 @@ import {
   getChat,
   sendMessage,
 } from "@database/handlers/MessengerHandler";
+import { getUserDB } from "@database/handlers/getUserDB";
+import searchUserDB from "@database/handlers/searchUserDB";
 
 export const cache: CacheType = {
   chats: [],
@@ -21,9 +22,10 @@ export const cache: CacheType = {
 
 export const getDatabase = () => {
   return {
-    getUser: getUser,
+    getUser: getUserDB,
     editUser: editUser,
-    searchUser: searchUser,
+    editInfoUser: editInfoUser,
+    searchUser: searchUserDB,
     notificationsGetUser: notificationsGetUser,
     notificationsAddUser: notificationsAddUser,
     sendMessage: sendMessage,

@@ -2,21 +2,10 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import http from "http";
-import { expressRoutes } from "@utils/routes";
 import cookieParser from "cookie-parser";
 import expressFileupload from "express-fileupload";
 import { Server } from "socket.io";
-import csrf from "csurf";
-import {
-  addOnlineUser,
-  removeOnlineUser,
-} from "@database/handlers/UserHandler";
-import {
-  createChat,
-  inviteUserChat,
-  sendMessage,
-} from "@database/handlers/MessengerHandler";
-import friendRequest from "@handlers/friendRequest";
+import { expressRoutes, socketRoutes } from "@utils/routes";
 
 const PORT = Number(process.env.PORT || 8000);
 
@@ -28,12 +17,6 @@ const corsConfig = {
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
-
-// const csrfProtection = csrf({
-//   cookie: {
-//     httpOnly: true,
-//   },
-// });
 
 app.use(cors(corsConfig));
 app.use(
@@ -47,11 +30,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-// app.use(csrfProtection);
-// app.all("*", (req, res, next) => {
-//   res.locals._csrf = req.csrfToken();
-//   next();
-// });
 app.use(expressRoutes);
 
 const server = http.createServer(app);
@@ -61,20 +39,7 @@ export const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("FRIEND_REQUEST", (data) => {
-    friendRequest(data);
-  });
-  socket.on("MESSAGE_SEND", sendMessage);
-  socket.on("CREATE_CHAT", createChat);
-  socket.on("INVITE_CHAT", inviteUserChat);
-  socket.on("USER_CONNECT", (userUID) => {
-    console.log(`[user_connect] - ${userUID} /// ${socket.id}`);
-    addOnlineUser(userUID, socket.id);
-  });
-  socket.on("disconnect", (reason) => {
-    console.log(`[user_disconnect] - ${socket.id}`);
-    removeOnlineUser(socket.id);
-  });
+  socketRoutes(socket);
 });
 
 server.listen(PORT, () => {
