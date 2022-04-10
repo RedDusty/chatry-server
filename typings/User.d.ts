@@ -6,6 +6,7 @@ type notificationsType = {
   header: string;
   data: string | any;
   time: number;
+  icon: null | string;
 };
 
 export type UserType = {
@@ -31,6 +32,7 @@ export type InfoUserType = {
   password: string;
   uid: string;
   refreshToken: string;
+  notifications: number;
 };
 
 export type UserShortType = {

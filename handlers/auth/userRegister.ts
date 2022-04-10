@@ -84,8 +84,9 @@ export default async function userRegister(req: Request, res: Response) {
             .collection("notifications")
             .add({
               time: new Date().getTime(),
-              header: "Account registered",
-              data: "You have more options available to you on the website.",
+              header: "ACCOUNT_REGISTER",
+              data: null,
+              icon: null,
             } as notificationsType);
           res.status(200).json({
             status: "ok",

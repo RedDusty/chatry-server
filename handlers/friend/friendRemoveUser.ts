@@ -35,7 +35,7 @@ export const friendRemoveUser = async (
     editUser(userReceiver.uid!, "friendsUID", newFriendsUID);
     const notif = {
       time: new Date().getTime(),
-      header: "Friend removed",
+      header: "FRIEND_REMOVE",
       data: userSender
         ? ({
             avatar: userSender.avatar,
@@ -44,6 +44,7 @@ export const friendRemoveUser = async (
             uid: userSender.uid,
           } as UserShortType)
         : userSenderUID,
+      icon: userSender ? userSender.avatar : null,
     } as notificationsType;
     const userIndex = cache.users.findIndex(
       (u) => u.userUID === userReceiver.uid

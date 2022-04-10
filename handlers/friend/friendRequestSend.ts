@@ -25,13 +25,14 @@ export const friendRequestSend = async (
     editUser(userReceiver.uid!, "waitingsUID", newWaitingList);
     const notif = {
       time: new Date().getTime(),
-      header: "Friend request",
+      header: "FRIEND_REQUEST_SEND",
       data: {
         avatar: userSender.avatar,
         username: userSender.username,
         online: userSender.online,
         uid: userSender.uid,
       } as UserShortType,
+      icon: userSender.avatar,
     } as notificationsType;
     const userIndex = cache.users.findIndex(
       (u) => u.userUID === userReceiver.uid

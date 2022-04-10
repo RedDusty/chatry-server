@@ -2,6 +2,7 @@ import { ioType } from "custom";
 import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
 import { InfoUserType, notificationsType, UserType } from "@typings/User";
+import { FieldValue } from "firebase-admin/firestore";
 
 // FRIEND REQUEST HANDLERS END
 
@@ -45,11 +46,13 @@ export const notificationsAddUser = async (
 
   notifCol.add(notification);
 
+  await fbFirestore.collection("Info_Users").doc(userUID).update({
+    notification: FieldValue.increment(1)
+  });
+
   if (io && ioEvent) {
     const userIndex = cache.users.findIndex((u) => u.userUID === userUID);
     if (userIndex !== -1) {
-      console.log("a");
-
       io.to(cache.users[userIndex].socketID).emit(ioEvent, notification);
     }
   }

@@ -22,13 +22,14 @@ export const friendAccept = async (
     editUser(userReceiver.uid!, "waitingsUID", newWaitingList);
     const notif = {
       time: new Date().getTime(),
-      header: "Friend request accepted",
+      header: "FRIEND_REQUEST_ACCEPT",
       data: {
         avatar: userSender.avatar,
         username: userSender.username,
         online: userSender.online,
         uid: userSender.uid,
       } as UserShortType,
+      icon: userSender.avatar,
     } as notificationsType;
     const userIndex = cache.users.findIndex(
       (u) => u.userUID === userReceiver.uid

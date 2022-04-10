@@ -4,6 +4,7 @@ import { ChatType, MessageType } from "@typings/Messenger";
 import checkFiles from "@utils/checkFiles";
 import { notificationsAddUser } from "@database/handlers/UserHandler";
 import { getUserDB } from "@database/handlers/getUserDB";
+import userShortObj from "@utils/userShortObj";
 
 export const createChat = (usersUID: string[]) => {
   const chatDoc = fbFirestore.collection("chats").doc();
@@ -130,8 +131,12 @@ export const inviteUserChat = async (
 
           notificationsAddUser(userGet.uid!, {
             time: new Date().getTime(),
-            header: "Chat invite",
-            data: `${userSend.uid} invited to ${chat.name} chat`,
+            header: "CHAT_INVITE",
+            data: {
+              user: userShortObj(userSend),
+              chat: chat,
+            },
+            icon: userSend.avatar,
           });
 
           return { userGet, userSend, chat };
