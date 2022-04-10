@@ -50,7 +50,7 @@ export default async function userRegister(req: Request, res: Response) {
 
   const userData = {
     username: username,
-    verified: true,
+    verified: false,
     uid: uid,
     registerDate: new Date().getTime(),
     subname: String(username).toLowerCase(),
