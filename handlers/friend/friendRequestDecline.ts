@@ -1,6 +1,7 @@
 import { cache } from "@database/cache";
 import { getUserDB } from "@database/handlers/getUserDB";
-import { editUser, notificationsAddUser } from "@database/handlers/UserHandler";
+import { notificationsAddUser } from "@database/handlers/notifications";
+import { editUser } from "@database/handlers/UserHandler";
 import { UserShortType, notificationsType } from "@typings/User";
 import userShortObj from "@utils/userShortObj";
 import { ioType } from "custom";

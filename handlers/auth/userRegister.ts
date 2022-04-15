@@ -48,7 +48,7 @@ export default async function userRegister(req: Request, res: Response) {
     }
   } while (isUnique === false);
 
-  const userData = {
+  const userData: UserType = {
     username: username,
     verified: false,
     uid: uid,
@@ -57,7 +57,19 @@ export default async function userRegister(req: Request, res: Response) {
     avatar: null,
     online: new Date().getTime(),
     banned: false,
-  } as UserType;
+    email: "",
+    friendsUID: [],
+    ignoresUID: [],
+    privacy: {
+      messages: "all",
+      profile: "public",
+    },
+    userSettings: {
+      theme: "white",
+    },
+    waitingsUID: [],
+    socketID: null,
+  };
 
   const token = await createToken(userData, uid);
   const refreshToken = await createRefreshToken(userData, uid, false);

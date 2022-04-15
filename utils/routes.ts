@@ -10,6 +10,7 @@ import friendRequest from "@handlers/friend/friendRequest";
 import tokenVerify from "./tokenVerify";
 import userLogout from "@handlers/auth/userLogout";
 import getNotifications from "@handlers/getNotifications";
+import getFriends from "@handlers/getFriends";
 
 export const expressRoutes = express.Router();
 
@@ -23,6 +24,7 @@ expressRoutes.post("/api/avatar", tokenVerify, userAvatar);
 expressRoutes.get("/api/user", getUserProfile);
 
 expressRoutes.post("/api/search/users", searchUser);
+expressRoutes.post("/api/search/friends", getFriends);
 
 expressRoutes.get("/api/notifications", tokenVerify, getNotifications);
 

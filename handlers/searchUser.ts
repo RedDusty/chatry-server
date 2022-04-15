@@ -9,7 +9,7 @@ export default async function searchUser(req: Request, res: Response) {
 
   if (key && value && typeof key === "string" && typeof value === "string") {
     let users: UserShortType[] = [];
-    
+
     if (value.startsWith("#")) {
       users = await searchUserDB("uid", value.substring(1), userUID);
     } else {
@@ -17,7 +17,9 @@ export default async function searchUser(req: Request, res: Response) {
     }
 
     res.status(200).json(users);
+    return;
   } else {
     res.status(404).send("NOT_FOUND");
+    return;
   }
 }

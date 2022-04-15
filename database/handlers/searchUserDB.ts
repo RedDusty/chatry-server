@@ -32,6 +32,7 @@ export default async function searchUserDB<K extends keyof UserType>(
       username: docData.username,
       online: isOnline !== -1 ? true : docData.online,
       uid: docData.uid,
+      privacy: docData.privacy,
     } as UserShortType);
   });
 

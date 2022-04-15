@@ -11,10 +11,10 @@ export const friendAddUser = async (
     if (firstUser && secondUser) {
       const newFriendsUID = firstUser.friendsUID;
       newFriendsUID.push(secondUser.uid!);
-      editUser(firstUser.uid!, "friendsUID", newFriendsUID);
+      editUser(firstUser.uid, "friendsUID", newFriendsUID);
       const userIndex = cache.users.findIndex((u) => u.userUID === firstUser.uid);
       if (userIndex !== -1) {
-        io.to(cache.users[userIndex].socketID).emit("FRIEND_REQUEST_CLIENT", {
+        io.to(cache.users[userIndex].socketID).emit("CLIENT_FRIENDS", {
           header: "ADD",
           user: secondUser.uid,
         });

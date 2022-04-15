@@ -1,10 +1,9 @@
 import { io } from "index";
-import { friendRemoveUser } from "./friendRemoveUser";
-import { friendAccept } from "./friendAccept";
-import { friendDecline } from "./friendRequestDecline";
-import { friendRequestSend } from "./friendRequestSend";
+import { friendRemoveUser } from "@handlers/friend/friendRemoveUser";
+import { friendDecline } from "@handlers/friend/friendRequestDecline";
+import { friendRequestAdd } from "@handlers/friend/friendRequestAdd";
 
-type requestTypeType = "add" | "remove" | "accept" | "decline";
+type requestTypeType = "add" | "remove" | "decline";
 
 const friendRequest = (data: any) => {
   const requestType = data.type as requestTypeType;
@@ -14,10 +13,7 @@ const friendRequest = (data: any) => {
   if (requestType && senderUID && receiverUID) {
     switch (requestType) {
       case "add":
-        friendRequestSend(io, senderUID, receiverUID);
-        break;
-      case "accept":
-        friendAccept(io, senderUID, receiverUID);
+        friendRequestAdd(io, senderUID, receiverUID);
         break;
       case "decline":
         friendDecline(io, senderUID, receiverUID);

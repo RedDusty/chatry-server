@@ -2,7 +2,7 @@ import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
 import { ChatType, MessageType } from "@typings/Messenger";
 import checkFiles from "@utils/checkFiles";
-import { notificationsAddUser } from "@database/handlers/UserHandler";
+import { notificationsAddUser } from "@database/handlers/notifications";
 import { getUserDB } from "@database/handlers/getUserDB";
 import userShortObj from "@utils/userShortObj";
 
