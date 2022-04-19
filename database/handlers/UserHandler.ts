@@ -27,19 +27,3 @@ export const editInfoUser = async <K extends keyof InfoUserType>(
 
   return res.writeTime;
 };
-
-export const addOnlineUser = async (userUID: string, socketID: string) => {
-  cache.users.push({ userUID, socketID });
-};
-
-export const removeOnlineUser = async (socketID: string) => {
-  const indexUser = cache.users.findIndex((user) => user.socketID === socketID);
-
-  if (indexUser !== -1) {
-    const userData = cache.users[indexUser];
-
-    editUser(userData.userUID, "online", new Date().getTime());
-
-    cache.users.splice(indexUser, 1);
-  }
-};

@@ -1,7 +1,7 @@
 import { notificationsAddUser } from "@database/handlers/notifications";
 import { editUser } from "@database/handlers/UserHandler";
 import { notificationsType, UserType } from "@typings/User";
-import userShortObj from '@utils/userShortObj';
+import userShortObj from "@utils/userShortObj";
 import { ioType } from "custom";
 import { friendAddUser } from "./friendAddUser";
 
@@ -20,12 +20,7 @@ export const friendAccept = async (
     data: userShortObj(userSender, userSender.uid),
     icon: userSender.avatar,
   } as notificationsType;
-  notificationsAddUser(
-    userReceiver.uid,
-    notif,
-    io,
-    "CLIENT_NOTIF"
-  );
+  notificationsAddUser(userReceiver.uid, notif, io);
   friendAddUser(io, userSender, userReceiver);
   friendAddUser(io, userReceiver, userSender);
 };

@@ -49,15 +49,14 @@ export const friendRequestAdd = async (
       );
       if (userIndex !== -1) {
         io.to(cache.users[userIndex].socketID).emit("CLIENT_FRIENDS", {
-          header: "RECEIVE",
-          user: userShortObj(userSender),
+          header: "FRIEND_REQUEST",
+          user: userSender.uid,
         });
       }
       notificationsAddUser(
         userReceiver.uid,
         notif,
         io,
-        "CLIENT_NOTIF"
       );
     }
   }

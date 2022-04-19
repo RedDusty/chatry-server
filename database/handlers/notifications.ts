@@ -32,8 +32,7 @@ export const notificationsGetUser = async (
 export const notificationsAddUser = async (
   userUID: string,
   notification: notificationsType,
-  io?: ioType,
-  ioEvent?: string
+  io?: ioType
 ) => {
   const notifCol = await fbFirestore
     .collection("Info_Users")
@@ -51,10 +50,10 @@ export const notificationsAddUser = async (
       notifications: FieldValue.increment(1),
     });
 
-  if (io && ioEvent) {
+  if (io) {
     const userIndex = cache.users.findIndex((u) => u.userUID === userUID);
     if (userIndex !== -1) {
-      io.to(cache.users[userIndex].socketID).emit(ioEvent, notification);
+      io.to(cache.users[userIndex].socketID).emit("CLIENT_NOTIF", notification);
     }
   }
 };

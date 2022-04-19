@@ -1,3 +1,4 @@
+import { cache } from "@database/cache";
 import { UserShortType, UserType } from "@typings/User";
 
 export default function userShortObj(
@@ -12,6 +13,10 @@ export default function userShortObj(
       uid: user.uid,
       privacy: user.privacy,
     } as UserShortType;
+
+    const isOnline = cache.users.findIndex((u) => u.userUID === user.uid);
+
+    rUser.online = isOnline !== -1 ? true : rUser.online;
 
     return rUser;
   } else {

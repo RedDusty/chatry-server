@@ -15,7 +15,7 @@ export const friendAddUser = async (
       const userIndex = cache.users.findIndex((u) => u.userUID === firstUser.uid);
       if (userIndex !== -1) {
         io.to(cache.users[userIndex].socketID).emit("CLIENT_FRIENDS", {
-          header: "ADD",
+          header: "FRIEND_ADD",
           user: secondUser.uid,
         });
       }

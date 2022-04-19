@@ -16,7 +16,7 @@ export const friendDecline = async (
   const userSender = await getUserDB("uid", userSenderUID);
 
   if (userReceiver && userSender) {
-    const newWaitingList = (userReceiver.waitingsUID || []).filter(
+    const newWaitingList = (userReceiver.waitingsUID).filter(
       (u) => u !== userSender.uid!
     );
     editUser(userReceiver.uid!, "waitingsUID", newWaitingList);
@@ -35,8 +35,8 @@ export const friendDecline = async (
       (u) => u.userUID === userReceiver.uid
     );
     if (userIndex !== -1) {
-      io.to(cache.users[userIndex].socketID).emit("FRIEND_REQUEST_CLIENT", {
-        header: "DECLINE",
+      io.to(cache.users[userIndex].socketID).emit("CLIENT_FRIENDS", {
+        header: "FRIEND_DECLINE",
         user: userShortObj(userSender),
       });
     }
@@ -44,7 +44,6 @@ export const friendDecline = async (
       userSender.uid!,
       notif,
       io,
-      "FRIEND_REQUEST_CLIENT_NOTIF"
     );
   }
 };

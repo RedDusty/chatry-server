@@ -25,8 +25,8 @@ export const friendRemoveUser = async (
     );
     if (userIndex !== -1) {
       io.to(cache.users[userIndex].socketID).emit("CLIENT_FRIENDS", {
-        header: "REMOVE",
-        user: userShortObj(userReceiver, userReceiverUID),
+        header: "FRIEND_REMOVE",
+        user: userReceiverUID,
       });
     }
   }
@@ -41,8 +41,8 @@ export const friendRemoveUser = async (
     );
     if (userIndex !== -1) {
       io.to(cache.users[userIndex].socketID).emit("CLIENT_FRIENDS", {
-        header: "REMOVE",
-        user: userShortObj(userSender, userSenderUID),
+        header: "FRIEND_REMOVE",
+        user: userSenderUID,
       });
     }
     const notif = {
@@ -54,8 +54,7 @@ export const friendRemoveUser = async (
     notificationsAddUser(
       userReceiver.uid!,
       notif,
-      io,
-      "CLIENT_NOTIF"
+      io
     );
   }
 };

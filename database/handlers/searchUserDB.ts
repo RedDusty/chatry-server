@@ -23,9 +23,7 @@ export default async function searchUserDB<K extends keyof UserType>(
     const docData = user.data() as UserShortType;
     if (docData.uid === userUID) return;
 
-    const isOnline = cache.users.findIndex(
-      (user) => user.userUID === docData.uid
-    );
+    const isOnline = cache.users.findIndex((u) => u.userUID === docData.uid);
 
     users.push({
       avatar: docData.avatar,
