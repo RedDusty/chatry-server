@@ -3,25 +3,37 @@ import { UserShortType } from "@typings/User";
 type MessageFileType = string | File;
 
 type MessageType = {
-  id?: string;
+  mid: string;
   time: number;
   message: string | MessageType;
   files?: MessageFileType[];
-  chatID: string;
+  cid: string;
   existsInDB: boolean;
   editedData?: boolean;
   user: UserShortType | "system";
 };
 
-export type ChatType = {
-  id: string;
+export type ChatMultipleType = {
+  cid: string;
   usersUID: string[];
   messagesCount: number;
   existsInDB: boolean;
   editedData: boolean;
-  chatType: "private" | "public" | "two-side";
+  chatType: "private" | "public";
   name: string;
   ownerUID: string;
+  avatar: string | null;
 };
+
+export type ChatTwoType = {
+  cid: string;
+  users: UserShortType[];
+  messagesCount: number;
+  chatType: "two-side";
+  existsInDB: boolean;
+  editedData: boolean;
+};
+
+export type ChatType = ChatMultipleType | ChatTwoType
 
 type MessagesType = Map<string, MessageType[]>;

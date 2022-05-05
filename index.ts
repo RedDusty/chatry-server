@@ -6,7 +6,10 @@ import cookieParser from "cookie-parser";
 import expressFileupload from "express-fileupload";
 import { Server } from "socket.io";
 import { expressRoutes, socketRoutes } from "@utils/routes";
-import { addOnlineUser, removeOnlineUser } from '@database/handlers/onlineUsers';
+import {
+  addOnlineUser,
+  removeOnlineUser,
+} from "@database/handlers/onlineUsers";
 
 const PORT = Number(process.env.PORT || 8000);
 
@@ -49,7 +52,6 @@ io.on("connection", (socket) => {
     console.log(`[user_disconnect] - ${socket.id}`);
     removeOnlineUser(socket.id);
   });
-  
 });
 
 server.listen(PORT, () => {
