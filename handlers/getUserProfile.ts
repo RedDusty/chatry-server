@@ -1,8 +1,24 @@
 import { Request, Response } from "express";
 import { cache } from "@database/cache";
 import { getUserDB } from "@database/handlers/getUserDB";
-import { UserType } from "@typings/User";
+import { UserPrivacyType, UserType } from "@typings/User";
 import userShortObj from "@utils/userShortObj";
+import { fbFirestore } from "@database/firebase";
+
+type lastUsernamesType = {
+  updateTime: number;
+  username: string;
+};
+
+type UserProileType = {
+  username: string;
+  subname: string;
+  online: number | true;
+  avatar: string | null;
+  privacy: UserPrivacyType;
+  uid: string;
+  usernames: lastUsernamesType[];
+};
 
 export default async function getUserProfile(req: Request, res: Response) {
   const userUID = req.query.user;
@@ -16,8 +32,22 @@ export default async function getUserProfile(req: Request, res: Response) {
 
     if (user) {
       const isOnline = cache.users.findIndex((u) => u.userUID === user!.uid);
-      const userShort = userShortObj(user);
+      const userShort = userShortObj(user) as UserProileType;
       userShort.online = isOnline !== -1 ? true : userShort.online;
+      const lastUsernames = await fbFirestore
+        .collection("users")
+        .doc(user.uid)
+        .collection("usernames")
+        .where("updateTime", "<", new Date().getTime())
+        .orderBy("updateTime", "desc")
+        .limit(3)
+        .get();
+
+      userShort["usernames"] = [];
+
+      lastUsernames.forEach((u) => {
+        userShort.usernames.push(u.data() as lastUsernamesType);
+      });
 
       res.status(200).json(userShort);
       return;

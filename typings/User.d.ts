@@ -41,6 +41,7 @@ export type UserType = {
   verified: boolean;
   socketID: string | null;
   banned: boolean;
+  lastUsernameUpdate: number;
 };
 
 export type InfoUserType = {

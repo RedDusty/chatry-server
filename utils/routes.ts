@@ -14,6 +14,7 @@ import getFriends from "@handlers/getFriends";
 import messagesGet from "@handlers/messages/messagesGet";
 import messagesSend from "@handlers/messages/messagesSend";
 import chatCreate from "@handlers/messages/chatCreate";
+import userChangeUsername from "@handlers/userChangeUsername";
 
 export const expressRoutes = express.Router();
 
@@ -37,4 +38,7 @@ export const socketRoutes = (socket: socketType) => {
   socket.on("MESSAGES_SEND", (data: any) => messagesSend(data, socket.id));
   socket.on("CHAT_SERVER_CREATE", (data: any) => chatCreate(data));
   socket.on("MESSAGE_SEND", (data: any) => messagesSend(data, socket.id));
+  socket.on("USER_CHANGE_USERNAME", (data: any) =>
+    userChangeUsername(data, socket.id)
+  );
 };

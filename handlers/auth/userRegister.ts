@@ -69,6 +69,7 @@ export default async function userRegister(req: Request, res: Response) {
     },
     waitingsUID: [],
     socketID: null,
+    lastUsernameUpdate: 0,
   };
 
   const token = await createToken(userData, uid);

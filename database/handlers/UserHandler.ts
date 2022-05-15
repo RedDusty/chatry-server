@@ -1,6 +1,6 @@
 import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
-import { InfoUserType, notificationsType, UserType } from "@typings/User";
+import { InfoUserType, UserType } from "@typings/User";
 
 export const editUser = async <K extends keyof UserType>(
   userUID: string,
