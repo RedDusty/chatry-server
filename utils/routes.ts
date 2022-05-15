@@ -13,7 +13,7 @@ import getNotifications from "@handlers/getNotifications";
 import getFriends from "@handlers/getFriends";
 import messagesGet from "@handlers/messages/messagesGet";
 import messagesSend from "@handlers/messages/messagesSend";
-import chatCreate from '@handlers/messages/chatCreate';
+import chatCreate from "@handlers/messages/chatCreate";
 
 export const expressRoutes = express.Router();
 
@@ -35,5 +35,6 @@ export const socketRoutes = (socket: socketType) => {
   socket.on("FRIEND_REQUEST", (data: any) => friendRequest(data));
   socket.on("MESSAGES_GET", (data: any) => messagesGet(data, socket.id));
   socket.on("MESSAGES_SEND", (data: any) => messagesSend(data, socket.id));
-  socket.on("CHAT_SERVER_CREATE", (data: any) => chatCreate(data))
+  socket.on("CHAT_SERVER_CREATE", (data: any) => chatCreate(data));
+  socket.on("MESSAGE_SEND", (data: any) => messagesSend(data, socket.id));
 };

@@ -12,6 +12,7 @@ export default function userShortObj(
       online: user.online,
       uid: user.uid,
       privacy: user.privacy,
+      subname: String(user.subname || user.username).toLowerCase(),
     } as UserShortType;
 
     const isOnline = cache.users.findIndex((u) => u.userUID === user.uid);
@@ -29,6 +30,7 @@ export default function userShortObj(
         messages: "all",
         profile: "public",
       },
+      subname: "deleted",
     } as UserShortType;
   }
 }

@@ -43,6 +43,7 @@ export default async function chatCreate(data: chatCreateDataType) {
     Object.assign(chatInfo, {
       chatType: "two-side",
       users: users,
+      usersUID: usersUID,
     } as ChatTwoType);
   }
 

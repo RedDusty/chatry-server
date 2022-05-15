@@ -6,34 +6,43 @@ import { UserType } from "@typings/User";
 import { io } from "index";
 import chatCreate from "@handlers/messages/chatCreate";
 import { isOnlineUser } from "@database/handlers/onlineUsers";
+import structuredClone from "@utils/structuredClone";
 
 export default async function messagesGet(uid: string, socketID: string) {
-  const chatsCached = cache.chats.filter(
-    (c) =>
-      c.chatType === "two-side" &&
-      c.users.findIndex((u) => u.uid === uid) !== -1
-  );
+  const chatsCached = cache.chats.filter((c) => c.usersUID.includes(uid));
 
-  const chatsDocsGet = await fbFirestore
+  const chatsMultipleDocsGet = await fbFirestore
     .collection("chats")
-    .where("users", "array-contains", uid)
+    .where("usersUID", "array-contains", uid)
+    .where("chatType", "!=", "two-side")
     .get();
+
+  const chatsTwoSideDocsGet = await fbFirestore
+    .collection("chats")
+    .where("usersUID", "array-contains", uid)
+    .where("chatType", "==", "two-side")
+    .get();
+
+  const chatsDocsGet = [
+    ...chatsTwoSideDocsGet.docs,
+    ...chatsMultipleDocsGet.docs,
+  ];
 
   const chats: ChatType[] = [];
 
-  if (chatsDocsGet.size > 0) {
-    const chatsDocs = chatsDocsGet.docs;
-
-    for (let idx = 0; idx < chatsDocs.length; idx++) {
-      const chatData = chatsDocs[idx].data() as ChatType;
+  if (chatsDocsGet.length > 0) {
+    for (let idx = 0; idx < chatsDocsGet.length; idx++) {
+      const chatData = chatsDocsGet[idx].data() as ChatType;
 
       if (chatsCached.findIndex((c) => c.cid !== chatData.cid)) {
         cache.chats.push(chatData);
-        delete (chatData as any).editedData;
-        delete (chatData as any).existsInDB;
-        if (chatData.chatType === "two-side") {
-          for (let idx = 0; idx < chatData.users.length; idx++) {
-            const u = chatData.users[idx];
+        const chat = structuredClone(chatData);
+        delete (chat as any).editedData;
+        delete (chat as any).existsInDB;
+
+        if (chat.chatType === "two-side") {
+          for (let kdx = 0; kdx < chat.users.length; kdx++) {
+            const u = chat.users[kdx];
             const isOnline = await isOnlineUser(u.uid);
             if (typeof isOnline === "number") {
               u.online = isOnline;
@@ -46,17 +55,18 @@ export default async function messagesGet(uid: string, socketID: string) {
           }
         }
 
-        chats.push(chatData);
+        chats.push(chat);
       }
     }
   } else {
     for (let idx = 0; idx < chatsCached.length; idx++) {
-      const c = chatsCached[idx];
-      delete (c as any).editedData;
-      delete (c as any).existsInDB;
-      if (c.chatType === "two-side") {
-        for (let kdx = 0; kdx < c.users.length; kdx++) {
-          const u = c.users[kdx];
+      const chat = structuredClone(chatsCached[idx]);
+      delete (chat as any).editedData;
+      delete (chat as any).existsInDB;
+
+      if (chat.chatType === "two-side") {
+        for (let kdx = 0; kdx < chat.users.length; kdx++) {
+          const u = chat.users[kdx];
           const isOnline = await isOnlineUser(u.uid);
           if (typeof isOnline === "number") {
             u.online = isOnline;
@@ -69,31 +79,35 @@ export default async function messagesGet(uid: string, socketID: string) {
         }
       }
 
-      chats.push(c);
+      chats.push(chat);
     }
   }
 
   const user = (await getUserDB("uid", uid)) as UserType;
   const friendsUIDS = user.friendsUID;
 
+  const friendsUIDsChats: string[] = [];
+
+  chats.forEach((c) => {
+    if (c.chatType === "two-side") {
+      const friendUID = c.usersUID.filter((u) => u !== uid)[0];
+      c.usersUID.includes(friendUID) && friendsUIDsChats.push(friendUID);
+    }
+  });
+
   for (let idx = 0; idx < friendsUIDS.length; idx++) {
-    const chatIndex = chats.findIndex(
-      (c) =>
-        c.chatType === "two-side" &&
-        c.users.findIndex((u) => u.uid === friendsUIDS[idx]) !== -1
-    );
-    if (chatIndex === -1) {
+    if (friendsUIDsChats.includes(friendsUIDS[idx]) === false) {
       const friendChat = await chatCreate({
         chatName: "two-side",
         uid: "two-side",
         usersUID: [uid, friendsUIDS[idx]],
       });
-
-      delete (friendChat as any).editedData;
-      delete (friendChat as any).existsInDB;
-      if (friendChat.chatType === "two-side") {
-        for (let idx = 0; idx < friendChat.users.length; idx++) {
-          const u = friendChat.users[idx];
+      const chat = structuredClone(friendChat);
+      delete (chat as any).editedData;
+      delete (chat as any).existsInDB;
+      if (chat.chatType === "two-side") {
+        for (let idx = 0; idx < chat.users.length; idx++) {
+          const u = chat.users[idx];
           const isOnline = await isOnlineUser(u.uid);
           if (typeof isOnline === "number") {
             u.online = isOnline;
@@ -106,7 +120,7 @@ export default async function messagesGet(uid: string, socketID: string) {
         }
       }
 
-      chats.push(friendChat);
+      chats.push(chat);
     }
   }
 
@@ -121,9 +135,11 @@ export default async function messagesGet(uid: string, socketID: string) {
       messages.push({ cid: chats[idx].cid, messages: cacheMessages });
     } else {
       const dbMessages = await fbFirestore
-        .collection("messages")
+        .collection("chats")
         .doc(chats[idx].cid)
         .collection("messages")
+        .orderBy("mid", "desc")
+        .limit(25)
         .get();
 
       const tempMessages: MessageType[] = [];
@@ -133,6 +149,8 @@ export default async function messagesGet(uid: string, socketID: string) {
       });
 
       tempMessages.sort((a, b) => a.time - b.time);
+
+      cache.messages.set(chats[idx].cid, tempMessages)
 
       messages.push({ cid: chats[idx].cid, messages: tempMessages });
     }

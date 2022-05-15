@@ -10,6 +10,7 @@ import {
   addOnlineUser,
   removeOnlineUser,
 } from "@database/handlers/onlineUsers";
+import { updater } from "@database/cache";
 
 const PORT = Number(process.env.PORT || 8000);
 
@@ -57,3 +58,21 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`[server]: Server running at ${PORT} port`);
 });
+
+const shedulerUpdateDB = () => {
+  setTimeout(() => {
+    updater();
+    console.log(
+      "[db update]: next - " +
+        new Date(new Date().getTime() + 1000 * 60 * 5).toLocaleString()
+    );
+
+    shedulerUpdateDB();
+  }, 1000 * 60 * 5);
+};
+
+console.log(
+  "[db update]: first - " +
+    new Date(new Date().getTime() + 1000 * 60 * 5).toLocaleString()
+);
+shedulerUpdateDB();

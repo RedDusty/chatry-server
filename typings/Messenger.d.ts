@@ -3,13 +3,13 @@ import { UserShortType } from "@typings/User";
 type MessageFileType = string | File;
 
 type MessageType = {
-  mid: string;
   time: number;
   message: string | MessageType;
   files?: MessageFileType[];
   cid: string;
   existsInDB: boolean;
   editedData?: boolean;
+  mid: number;
   user: UserShortType | "system";
 };
 
@@ -28,6 +28,7 @@ export type ChatMultipleType = {
 export type ChatTwoType = {
   cid: string;
   users: UserShortType[];
+  usersUID: string[];
   messagesCount: number;
   chatType: "two-side";
   existsInDB: boolean;

@@ -12,7 +12,7 @@ type notificationsHeaderFriendType =
   | "FRIEND_REQUEST_ACCEPT"
   | "FRIEND_REQUEST_DECLINE"
   | "FRIEND_REMOVE";
-  
+
 type notificationsHeaderType =
   | notificationsHeaderFriendType
   | "ACCOUNT_REGISTER"
@@ -60,4 +60,5 @@ export type UserShortType = {
   online: true | number;
   avatar: string | null;
   privacy: UserPrivacyType;
+  subname: string;
 };
