@@ -8,6 +8,11 @@ import chatCreate from "@handlers/messages/chatCreate";
 import { isOnlineUser } from "@database/handlers/onlineUsers";
 import structuredClone from "@utils/structuredClone";
 
+type chatMessagesType = {
+  cid: string;
+  messages: MessageType[];
+};
+
 export default async function messagesGet(uid: string, socketID: string) {
   const chatsCached = cache.chats.filter((c) => c.usersUID.includes(uid));
 
@@ -30,11 +35,34 @@ export default async function messagesGet(uid: string, socketID: string) {
 
   const chats: ChatType[] = [];
 
+  for (let idx = 0; idx < chatsCached.length; idx++) {
+    const chat = structuredClone(chatsCached[idx]);
+    delete (chat as any).editedData;
+    delete (chat as any).existsInDB;
+
+    if (chat.chatType === "two-side") {
+      for (let kdx = 0; kdx < chat.users.length; kdx++) {
+        const u = chat.users[kdx];
+        const isOnline = await isOnlineUser(u.uid);
+        if (typeof isOnline === "number") {
+          u.online = isOnline;
+        } else if (isOnline === true) {
+          u.online = true;
+        } else {
+          const user = await getUserDB("uid", u.uid);
+          u.online = user !== null ? user.online : 0;
+        }
+      }
+    }
+
+    chats.push(chat);
+  }
+
   if (chatsDocsGet.length > 0) {
     for (let idx = 0; idx < chatsDocsGet.length; idx++) {
       const chatData = chatsDocsGet[idx].data() as ChatType;
 
-      if (chatsCached.findIndex((c) => c.cid !== chatData.cid)) {
+      if (chatsCached.findIndex((c) => c.cid === chatData.cid) === -1) {
         cache.chats.push(chatData);
         const chat = structuredClone(chatData);
         delete (chat as any).editedData;
@@ -57,29 +85,6 @@ export default async function messagesGet(uid: string, socketID: string) {
 
         chats.push(chat);
       }
-    }
-  } else {
-    for (let idx = 0; idx < chatsCached.length; idx++) {
-      const chat = structuredClone(chatsCached[idx]);
-      delete (chat as any).editedData;
-      delete (chat as any).existsInDB;
-
-      if (chat.chatType === "two-side") {
-        for (let kdx = 0; kdx < chat.users.length; kdx++) {
-          const u = chat.users[kdx];
-          const isOnline = await isOnlineUser(u.uid);
-          if (typeof isOnline === "number") {
-            u.online = isOnline;
-          } else if (isOnline === true) {
-            u.online = true;
-          } else {
-            const user = await getUserDB("uid", u.uid);
-            u.online = user !== null ? user.online : 0;
-          }
-        }
-      }
-
-      chats.push(chat);
     }
   }
 
@@ -124,7 +129,7 @@ export default async function messagesGet(uid: string, socketID: string) {
     }
   }
 
-  const messages = [];
+  const messages: chatMessagesType[] = [];
 
   for (let idx = 0; idx < chats.length; idx++) {
     const hasCacheMessages = cache.messages.has(chats[idx].cid);
@@ -150,7 +155,7 @@ export default async function messagesGet(uid: string, socketID: string) {
 
       tempMessages.sort((a, b) => a.time - b.time);
 
-      cache.messages.set(chats[idx].cid, tempMessages)
+      cache.messages.set(chats[idx].cid, tempMessages);
 
       messages.push({ cid: chats[idx].cid, messages: tempMessages });
     }
