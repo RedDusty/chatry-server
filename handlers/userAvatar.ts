@@ -1,10 +1,11 @@
 import { randomUUID } from "crypto";
-import { fbApp, fbFirestore, fbStorage } from "@database/firebase";
+import { fbStorage } from "@database/firebase";
 import { Request, Response } from "express";
 import { Stream } from "stream";
 import { UploadedFile } from "express-fileupload";
 import { Buffer } from "buffer";
 import { getUserDB } from "@database/handlers/getUserDB";
+import { editUser } from "@database/handlers/UserHandler";
 
 export default async function userAvatar(req: Request, res: Response) {
   try {
@@ -45,14 +46,15 @@ export default async function userAvatar(req: Request, res: Response) {
             })
           )
           .on("finish", async () => {
-            await fbFirestore
-              .collection("users")
-              .doc(userUID)
-              .update({
-                avatar: `https://firebasestorage.googleapis.com/v0/b/${
-                  bucket.name
-                }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`,
-              });
+            const avatarURL =
+              "https://firebasestorage.googleapis.com/v0/b/" +
+              bucket.name +
+              "/o/" +
+              encodeURIComponent(file.name) +
+              "?alt=media&token=" +
+              uuid;
+
+            editUser(userUID, "avatar", avatarURL);
           });
 
         res.status(200).send("OK");

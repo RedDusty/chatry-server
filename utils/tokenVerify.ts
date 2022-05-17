@@ -1,4 +1,4 @@
-import { IRequestWithUser } from "custom";
+import { IRequestWithUser, tokenType } from "custom";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
@@ -15,7 +15,9 @@ const tokenVerify = (
 
     jwt.verify(token, uid, (err, user) => {
       if (err) return res.send(401).send("Token is not valid");
-      req.user = user;
+      if ((user as tokenType).uid) {
+        req.user = user as tokenType;
+      }
 
       next();
     });

@@ -1,9 +1,10 @@
 import { ChatType, MessagesType } from "@typings/Messenger";
-import { UserType } from "@typings/User";
+import { UserTypeServer } from "@typings/User";
 
 type UsersCacheType = {
   userUID: string;
-  socketID: string;
+  socketID: string | null;
+  info: UserTypeServer;
 };
 
 export type CacheType = {

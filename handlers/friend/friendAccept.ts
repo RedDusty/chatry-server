@@ -1,14 +1,13 @@
 import { notificationsAddUser } from "@database/handlers/notifications";
 import { editUser } from "@database/handlers/UserHandler";
-import { notificationsType, UserType } from "@typings/User";
-import userShortObj from "@utils/userShortObj";
+import { notificationsTypeServer, UserTypeServer } from "@typings/User";
 import { ioType } from "custom";
 import { friendAddUser } from "./friendAddUser";
 
 export const friendAccept = async (
   io: ioType,
-  userSender: UserType,
-  userReceiver: UserType
+  userSender: UserTypeServer,
+  userReceiver: UserTypeServer
 ) => {
   const newWaitingList = userSender.waitingsUID.filter(
     (u) => u !== userReceiver.uid
@@ -17,9 +16,9 @@ export const friendAccept = async (
   const notif = {
     time: new Date().getTime(),
     header: "FRIEND_REQUEST_ACCEPT",
-    data: userShortObj(userSender, userSender.uid),
     icon: userSender.avatar,
-  } as notificationsType;
+    userUID: userSender.uid,
+  } as notificationsTypeServer;
   notificationsAddUser(userReceiver.uid, notif, io);
   friendAddUser(io, userSender, userReceiver);
   friendAddUser(io, userReceiver, userSender);

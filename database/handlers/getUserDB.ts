@@ -1,31 +1,53 @@
+import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
-import { InfoUserType, UserType } from "@typings/User";
+import { InfoUserType, UserTypeServer } from "@typings/User";
 
-export async function getUserDB<K extends keyof UserType>(
+export async function getUserDB<K extends keyof UserTypeServer>(
   key: K,
-  value: UserType[K]
+  value: UserTypeServer[K]
 ) {
-  const userDocs = await fbFirestore
-    .collection("users")
-    .where(key, "==", value)
-    .limit(1)
-    .get();
+  if (key === "subname") {
+    value = String(value).toLowerCase() as any;
+  }
 
-  if (userDocs.size === 0) return null;
+  const users = cache.users.filter((u) => u.info[key] === value);
 
-  const userDoc = userDocs.docs[0];
+  if (users.length > 0) {
+    return users[0].info;
+  } else {
+    const userDocs = await fbFirestore
+      .collection("users")
+      .where(key, "==", value)
+      .limit(1)
+      .get();
 
-  if (userDoc.exists === false) return null;
+    if (userDocs.size === 0) return null;
 
-  const userInfo = userDoc.data();
+    const userDoc = userDocs.docs[0];
 
-  return userInfo as UserType;
+    if (userDoc.exists === false) return null;
+
+    const userInfo = userDoc.data() as UserTypeServer;
+
+    if (cache.users.filter((u) => u.userUID === userInfo.uid).length === 0) {
+      cache.users.push({
+        info: userInfo,
+        socketID: null,
+        userUID: userInfo.uid,
+      });
+    }
+
+    return userInfo as UserTypeServer;
+  }
 }
 
 export async function getInfoUserDB<K extends keyof InfoUserType>(
   key: K,
   value: InfoUserType[K]
 ) {
+  if (key === "subname") {
+    value = String(value).toLowerCase() as any;
+  }
   const userDocs = await fbFirestore
     .collection("Info_Users")
     .where(key, "==", value)

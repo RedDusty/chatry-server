@@ -1,6 +1,5 @@
 import { getInfoUserDB, getUserDB } from "@database/handlers/getUserDB";
 import { editInfoUser } from "@database/handlers/UserHandler";
-import { UserType } from "@typings/User";
 import { createRefreshToken, createToken } from "@utils/token";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";

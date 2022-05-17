@@ -1,8 +1,8 @@
 import { cache } from "@database/cache";
-import { UserShortType, UserType } from "@typings/User";
+import { UserShortType, UserTypeServer } from "@typings/User";
 
 export default function userShortObj(
-  user: UserType | UserShortType | null,
+  user: UserTypeServer | UserShortType | null,
   uid?: string
 ) {
   if (user) {
@@ -12,7 +12,6 @@ export default function userShortObj(
       online: user.online,
       uid: user.uid,
       privacy: user.privacy,
-      subname: String(user.subname || user.username).toLowerCase(),
     } as UserShortType;
 
     const isOnline = cache.users.findIndex((u) => u.userUID === user.uid);
@@ -30,7 +29,6 @@ export default function userShortObj(
         messages: "all",
         profile: "public",
       },
-      subname: "deleted",
     } as UserShortType;
   }
 }

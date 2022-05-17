@@ -4,7 +4,9 @@ import { io } from "index";
 import { getUserDB } from "@database/handlers/getUserDB";
 import { fbFirestore } from "@database/firebase";
 import { createRefreshToken, createToken } from "@utils/token";
-import { UserType } from "@typings/User";
+import { UserTypeServer } from "@typings/User";
+import { editInfoUser, editUser } from "@database/handlers/UserHandler";
+import { UsersCacheType } from "@typings/Cache";
 
 export default async function userChangeUsername(data: any, socketID: string) {
   const username = data.username as string;
@@ -15,7 +17,7 @@ export default async function userChangeUsername(data: any, socketID: string) {
     String(username).toLowerCase()
   );
   const doc = await fbFirestore.collection("users").doc(uid).get();
-  const userData = doc.data() as UserType;
+  const userData = doc.data() as UserTypeServer;
   const prevUsername = userData.username;
   userData.username = String(username);
   userData.subname = String(username).toLowerCase();
@@ -66,31 +68,12 @@ export default async function userChangeUsername(data: any, socketID: string) {
   }
 
   if (canChange) {
-    await fbFirestore
-      .collection("users")
-      .doc(uid)
-      .update({
-        username: String(username),
-        subname: String(username).toLowerCase(),
-        lastUsernameUpdate: lastUsernameUpdate,
-      } as UserType)
-      .then(() => {
-        io.to(socketID).emit("USERNAME_CHANGE", {
-          error: false,
-          username: String(username),
-          subname: String(username).toLowerCase(),
-          token: token,
-          refreshToken: refreshToken,
-          user: userData,
-        });
-      });
-    await fbFirestore
-      .collection("Info_Users")
-      .doc(uid)
-      .update({
-        subname: String(username).toLowerCase(),
-        refreshToken,
-      });
+    editUser(uid, "username", username);
+    editUser(uid, "subname", String(username).toLowerCase());
+    editUser(uid, "lastUsernameUpdate", lastUsernameUpdate);
+
+    editInfoUser(uid, "subname", String(username).toLowerCase());
+    editInfoUser(uid, "refreshToken", refreshToken);
 
     await fbFirestore
       .collection("users")
@@ -102,44 +85,42 @@ export default async function userChangeUsername(data: any, socketID: string) {
         username: prevUsername,
       });
 
-    const getChats = await fbFirestore
-      .collection("chats")
-      .where("usersUID", "array-contains", uid)
-      .where("chatType", "==", "two-side")
-      .get();
+    io.to(socketID).emit("USERNAME_CHANGE", {
+      error: false,
+      username: String(username),
+      subname: String(username).toLowerCase(),
+      token: token,
+      refreshToken: refreshToken,
+      user: userData,
+    });
 
-    cache.chats.forEach((c) => {
-      if (c.chatType === "two-side") {
-        const chatUser = c.users.filter((u) => u.uid === uid)[0];
-        chatUser.username = String(username);
-        chatUser.subname = String(username).toLowerCase();
+    const chats = cache.chats.filter((c) => c.usersUID.includes(uid));
+
+    const usersToUpdate: UsersCacheType[] = [];
+    const usersUIDToUpdate: string[] = [];
+
+    chats.forEach((c) => {
+      c.usersUID.forEach((u) => {
+        if (usersUIDToUpdate.includes(u) === false) {
+          const cachedUsers = cache.users.filter(
+            (cu) => cu.userUID === u && cu.socketID !== null
+          );
+
+          if (cachedUsers.length === 1) {
+            usersToUpdate.push(cachedUsers[0]);
+            usersUIDToUpdate.push(cachedUsers[0].userUID);
+          }
+        }
+      });
+    });
+
+    usersToUpdate.forEach((u) => {
+      if (u.socketID) {
+        io.to(u.socketID).emit("USERS_CACHE_UPDATE", {
+          uid: userData.uid,
+          username: userData.username,
+        });
       }
-    });
-
-    cache.messages.forEach((c) => {
-      c.forEach((m) => {
-        if (m.user !== "system") {
-          m.user.username = String(username);
-          m.user.subname = String(username).toLowerCase();
-        }
-      });
-    });
-
-    getChats.forEach(async (doc) => {
-      const chat = doc.data() as ChatTwoType;
-
-      const users = chat.users;
-
-      users.forEach((u) => {
-        if (u.uid === uid) {
-          u.username = String(username);
-          u.subname = String(username).toLowerCase();
-        }
-      });
-
-      await fbFirestore.collection("chats").doc(chat.cid).update({
-        users: users,
-      });
     });
   }
 

@@ -1,10 +1,10 @@
 import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
-import { UserShortType, UserType } from "@typings/User";
+import { UserShortType, UserTypeServer } from "@typings/User";
 
-export default async function searchUserDB<K extends keyof UserType>(
+export default async function searchUserDB<K extends keyof UserTypeServer>(
   key: K,
-  value: UserType[K] | string,
+  value: UserTypeServer[K] | string,
   userUID: string
 ) {
   if (key === "subname") {

@@ -13,7 +13,7 @@ export default async function searchUser(req: Request, res: Response) {
     if (value.startsWith("#")) {
       users = await searchUserDB("uid", value.substring(1), userUID);
     } else {
-      users = await searchUserDB("subname", value, userUID);
+      users = await searchUserDB("subname", String(value).toLowerCase(), userUID);
     }
 
     res.status(200).json(users);

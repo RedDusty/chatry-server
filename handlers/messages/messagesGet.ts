@@ -2,11 +2,12 @@ import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
 import { getUserDB } from "@database/handlers/getUserDB";
 import { ChatType, MessageType } from "@typings/Messenger";
-import { UserType } from "@typings/User";
+import { UserShortType, UserTypeServer } from "@typings/User";
 import { io } from "index";
 import chatCreate from "@handlers/messages/chatCreate";
 import { isOnlineUser } from "@database/handlers/onlineUsers";
 import structuredClone from "@utils/structuredClone";
+import userShortObj from "@utils/userShortObj";
 
 type chatMessagesType = {
   cid: string;
@@ -34,24 +35,20 @@ export default async function messagesGet(uid: string, socketID: string) {
   ];
 
   const chats: ChatType[] = [];
+  const usersC: UserShortType[] = [];
 
   for (let idx = 0; idx < chatsCached.length; idx++) {
     const chat = structuredClone(chatsCached[idx]);
     delete (chat as any).editedData;
     delete (chat as any).existsInDB;
 
-    if (chat.chatType === "two-side") {
-      for (let kdx = 0; kdx < chat.users.length; kdx++) {
-        const u = chat.users[kdx];
-        const isOnline = await isOnlineUser(u.uid);
-        if (typeof isOnline === "number") {
-          u.online = isOnline;
-        } else if (isOnline === true) {
-          u.online = true;
-        } else {
-          const user = await getUserDB("uid", u.uid);
-          u.online = user !== null ? user.online : 0;
-        }
+    for (let kdx = 0; kdx < chat.usersUID.length; kdx++) {
+      const uidC = chat.usersUID[kdx];
+
+      if (usersC.filter((u) => u.uid === uidC).length === 0) {
+        const userC = await getUserDB("uid", uidC);
+
+        usersC.push(userShortObj(userC));
       }
     }
 
@@ -68,18 +65,13 @@ export default async function messagesGet(uid: string, socketID: string) {
         delete (chat as any).editedData;
         delete (chat as any).existsInDB;
 
-        if (chat.chatType === "two-side") {
-          for (let kdx = 0; kdx < chat.users.length; kdx++) {
-            const u = chat.users[kdx];
-            const isOnline = await isOnlineUser(u.uid);
-            if (typeof isOnline === "number") {
-              u.online = isOnline;
-            } else if (isOnline === true) {
-              u.online = true;
-            } else {
-              const user = await getUserDB("uid", u.uid);
-              u.online = user !== null ? user.online : 0;
-            }
+        for (let kdx = 0; kdx < chat.usersUID.length; kdx++) {
+          const uidC = chat.usersUID[kdx];
+
+          if (usersC.filter((u) => u.uid === uidC).length === 0) {
+            const userC = await getUserDB("uid", uidC);
+
+            usersC.push(userShortObj(userC));
           }
         }
 
@@ -88,7 +80,7 @@ export default async function messagesGet(uid: string, socketID: string) {
     }
   }
 
-  const user = (await getUserDB("uid", uid)) as UserType;
+  const user = (await getUserDB("uid", uid)) as UserTypeServer;
   const friendsUIDS = user.friendsUID;
 
   const friendsUIDsChats: string[] = [];
@@ -110,18 +102,14 @@ export default async function messagesGet(uid: string, socketID: string) {
       const chat = structuredClone(friendChat);
       delete (chat as any).editedData;
       delete (chat as any).existsInDB;
-      if (chat.chatType === "two-side") {
-        for (let idx = 0; idx < chat.users.length; idx++) {
-          const u = chat.users[idx];
-          const isOnline = await isOnlineUser(u.uid);
-          if (typeof isOnline === "number") {
-            u.online = isOnline;
-          } else if (isOnline === true) {
-            u.online = true;
-          } else {
-            const user = await getUserDB("uid", u.uid);
-            u.online = user !== null ? user.online : 0;
-          }
+
+      for (let kdx = 0; kdx < chat.usersUID.length; kdx++) {
+        const uidC = chat.usersUID[kdx];
+
+        if (usersC.filter((u) => u.uid === uidC).length === 0) {
+          const userC = await getUserDB("uid", uidC);
+
+          usersC.push(userShortObj(userC));
         }
       }
 
@@ -136,6 +124,16 @@ export default async function messagesGet(uid: string, socketID: string) {
 
     if (hasCacheMessages) {
       const cacheMessages = cache.messages.get(chats[idx].cid)!;
+
+      for (let kdx = 0; kdx < cacheMessages.length; kdx++) {
+        const uidC = cacheMessages[kdx].user;
+
+        if (usersC.filter((u) => u.uid === uidC).length === 0) {
+          const user = await getUserDB("uid", uidC);
+
+          usersC.push(userShortObj(user));
+        }
+      }
 
       messages.push({ cid: chats[idx].cid, messages: cacheMessages });
     } else {
@@ -157,6 +155,16 @@ export default async function messagesGet(uid: string, socketID: string) {
 
       cache.messages.set(chats[idx].cid, tempMessages);
 
+      for (let kdx = 0; kdx < tempMessages.length; kdx++) {
+        const uidC = tempMessages[kdx].user;
+
+        if (usersC.filter((u) => u.uid === uidC).length === 0) {
+          const user = await getUserDB("uid", uidC);
+
+          usersC.push(userShortObj(user));
+        }
+      }
+
       messages.push({ cid: chats[idx].cid, messages: tempMessages });
     }
   }
@@ -164,6 +172,7 @@ export default async function messagesGet(uid: string, socketID: string) {
   io.to(socketID).emit("CHATS_INITIAL", {
     chats: chats,
     messages: messages,
+    usersC: usersC,
   });
   return;
 }

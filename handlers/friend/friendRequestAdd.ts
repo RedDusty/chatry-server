@@ -2,8 +2,7 @@ import { cache } from "@database/cache";
 import { getUserDB } from "@database/handlers/getUserDB";
 import { notificationsAddUser } from "@database/handlers/notifications";
 import { editUser } from "@database/handlers/UserHandler";
-import { notificationsType } from "@typings/User";
-import userShortObj from "@utils/userShortObj";
+import { notificationsTypeServer } from "@typings/User";
 import { ioType } from "custom";
 import { friendAccept } from "@handlers/friend/friendAccept";
 
@@ -41,23 +40,20 @@ export const friendRequestAdd = async (
       const notif = {
         time: new Date().getTime(),
         header: "FRIEND_REQUEST_ADD",
-        data: userShortObj(userSender, userSender.uid),
         icon: userSender.avatar,
-      } as notificationsType;
-      const userIndex = cache.users.findIndex(
-        (u) => u.userUID === userReceiver.uid
-      );
-      if (userIndex !== -1) {
-        io.to(cache.users[userIndex].socketID).emit("CLIENT_FRIENDS", {
-          header: "FRIEND_REQUEST",
-          user: userSender.uid,
-        });
+        userUID: userSender.uid,
+      } as notificationsTypeServer;
+      const users = cache.users.filter((u) => u.userUID === userReceiver.uid);
+      if (users.length === 1) {
+        const socket = users[0].socketID;
+        if (socket) {
+          io.to(socket).emit("CLIENT_FRIENDS", {
+            header: "FRIEND_REQUEST",
+            user: userSender.uid,
+          });
+        }
       }
-      notificationsAddUser(
-        userReceiver.uid,
-        notif,
-        io,
-      );
+      notificationsAddUser(userReceiver.uid, notif, io);
     }
   }
 };

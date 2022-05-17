@@ -64,15 +64,15 @@ const shedulerUpdateDB = () => {
     updater();
     console.log(
       "[db update]: next - " +
-        new Date(new Date().getTime() + 1000 * 60 * 1).toLocaleString()
+        new Date(new Date().getTime() + 1000 * 60 * 5).toLocaleString()
     );
 
     shedulerUpdateDB();
-  }, 1000 * 60 * 1);
+  }, 1000 * 60 * 5);
 };
 
 console.log(
   "[db update]: first - " +
-    new Date(new Date().getTime() + 1000 * 60 * 1).toLocaleString()
+    new Date(new Date().getTime() + 1000 * 60 * 5).toLocaleString()
 );
 shedulerUpdateDB();

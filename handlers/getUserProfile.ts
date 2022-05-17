@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { cache } from "@database/cache";
 import { getUserDB } from "@database/handlers/getUserDB";
-import { UserPrivacyType, UserType } from "@typings/User";
+import { UserPrivacyType, UserTypeServer } from "@typings/User";
 import userShortObj from "@utils/userShortObj";
 import { fbFirestore } from "@database/firebase";
 
@@ -12,7 +12,6 @@ type lastUsernamesType = {
 
 type UserProileType = {
   username: string;
-  subname: string;
   online: number | true;
   avatar: string | null;
   privacy: UserPrivacyType;
@@ -24,10 +23,13 @@ export default async function getUserProfile(req: Request, res: Response) {
   const userUID = req.query.user;
 
   if (userUID && typeof userUID === "string") {
-    let user = (await getUserDB("subname", userUID)) as UserType | null;
+    let user = (await getUserDB(
+      "subname",
+      String(userUID).toLowerCase()
+    )) as UserTypeServer | null;
 
     if (user === null) {
-      user = (await getUserDB("uid", userUID)) as UserType | null;
+      user = (await getUserDB("uid", userUID)) as UserTypeServer | null;
     }
 
     if (user) {

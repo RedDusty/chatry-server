@@ -35,10 +35,10 @@ expressRoutes.get("/api/notifications", tokenVerify, getNotifications);
 export const socketRoutes = (socket: socketType) => {
   socket.on("FRIEND_REQUEST", (data: any) => friendRequest(data));
   socket.on("MESSAGES_GET", (data: any) => messagesGet(data, socket.id));
-  socket.on("MESSAGES_SEND", (data: any) => messagesSend(data, socket.id));
   socket.on("CHAT_SERVER_CREATE", (data: any) => chatCreate(data));
   socket.on("MESSAGE_SEND", (data: any) => messagesSend(data, socket.id));
   socket.on("USER_CHANGE_USERNAME", (data: any) =>
     userChangeUsername(data, socket.id)
   );
+  socket.on("USER_PRIVACY", (data: any) => {})
 };

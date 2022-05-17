@@ -1,7 +1,6 @@
 import { cache } from "@database/cache";
 import { MessageType } from "@typings/Messenger";
 import { io } from "index";
-import * as crypto from "crypto";
 import structuredClone from "@utils/structuredClone";
 import userShortObj from "@utils/userShortObj";
 
@@ -21,9 +20,6 @@ export default async function messagesSend(data: any, socketID: string) {
 
   message.time = new Date().getTime();
   message.existsInDB = false;
-  if (message.user !== "system") {
-    message.user = userShortObj(message.user);
-  }
 
   const chat = cache.chats.find((c) => c.cid === message.cid);
 
@@ -37,15 +33,7 @@ export default async function messagesSend(data: any, socketID: string) {
       cachedMessages.push(message);
     }
 
-    if (
-      chat.chatType === "two-side" &&
-      chat.users.filter((u) => u.uid === uid).length === 1
-    ) {
-      canUserMessage = true;
-    } else if (
-      chat.chatType !== "two-side" &&
-      chat.usersUID.filter((u) => u === uid).length === 1
-    ) {
+    if (chat.usersUID.filter((u) => u === uid).length === 1) {
       canUserMessage = true;
     }
 
@@ -61,31 +49,39 @@ export default async function messagesSend(data: any, socketID: string) {
 
     if (chat.chatType !== "two-side") {
       chat.usersUID.forEach((cu) => {
-        const userIndex = cache.users.findIndex((u) => u.userUID === cu);
+        const users = cache.users.filter((u) => u.userUID === cu);
 
-        if (userIndex !== -1) {
-          delete (messageReady as any).existsInDB;
-          delete (messageReady as any).editedData;
-          io.to(cache.users[userIndex].socketID).emit("MESSAGE_ACCEPT", {
-            messagesCount: chat.messagesCount,
-            message: messageReady,
-            cid: chat.cid,
-          });
+        if (users.length === 1) {
+          const socket = users[0].socketID;
+
+          if (socket) {
+            delete (messageReady as any).existsInDB;
+            delete (messageReady as any).editedData;
+            io.to(socket).emit("MESSAGE_ACCEPT", {
+              messagesCount: chat.messagesCount,
+              message: messageReady,
+              cid: chat.cid,
+            });
+          }
         }
       });
       return;
     } else {
-      chat.users.forEach((cu) => {
-        const userIndex = cache.users.findIndex((u) => u.userUID === cu.uid);
+      chat.usersUID.forEach((cu) => {
+        const users = cache.users.filter((u) => u.userUID === cu);
 
-        if (userIndex !== -1) {
-          delete (messageReady as any).existsInDB;
-          delete (messageReady as any).editedData;
-          io.to(cache.users[userIndex].socketID).emit("MESSAGE_ACCEPT", {
-            messagesCount: chat.messagesCount,
-            message: messageReady,
-            cid: chat.cid,
-          });
+        if (users.length === 1) {
+          const socket = users[0].socketID;
+
+          if (socket) {
+            delete (messageReady as any).existsInDB;
+            delete (messageReady as any).editedData;
+            io.to(socket).emit("MESSAGE_ACCEPT", {
+              messagesCount: chat.messagesCount,
+              message: messageReady,
+              cid: chat.cid,
+            });
+          }
         }
       });
       return;

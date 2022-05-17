@@ -2,9 +2,14 @@ import "dotenv/config";
 import { Request, Response } from "express";
 import * as crypto from "crypto";
 import { fbFirestore } from "@database/firebase";
-import { InfoUserType, notificationsType, UserType } from "@typings/User";
+import {
+  InfoUserType,
+  notificationsTypeServer,
+  UserTypeServer,
+} from "@typings/User";
 import { Password } from "@utils/password";
 import { createRefreshToken, createToken } from "@utils/token";
+import structuredClone from "@utils/structuredClone";
 
 export default async function userRegister(req: Request, res: Response) {
   const username: string = req.body.username;
@@ -22,12 +27,12 @@ export default async function userRegister(req: Request, res: Response) {
 
   const hashedPassword: string = await Password.toHash(password);
 
-  const searchSubname = await fbFirestore
+  const searchUsername = await fbFirestore
     .collection("Info_Users")
     .where("subname", "==", String(username).toLowerCase())
     .get();
 
-  if (searchSubname.size > 0) {
+  if (searchUsername.size > 0) {
     res.status(403).send("USER_EXISTS");
     return;
   }
@@ -41,6 +46,7 @@ export default async function userRegister(req: Request, res: Response) {
       .collection("users")
       .where("uid", "==", uid)
       .get();
+
     if (searchUUID.size > 0) {
       isUnique = false;
     } else {
@@ -48,12 +54,12 @@ export default async function userRegister(req: Request, res: Response) {
     }
   } while (isUnique === false);
 
-  const userData: UserType = {
+  const userData: UserTypeServer = {
     username: username,
+    subname: String(username).toLowerCase(),
     verified: false,
     uid: uid,
     registerDate: new Date().getTime(),
-    subname: String(username).toLowerCase(),
     avatar: null,
     online: new Date().getTime(),
     banned: false,
@@ -64,12 +70,10 @@ export default async function userRegister(req: Request, res: Response) {
       messages: "all",
       profile: "public",
     },
-    userSettings: {
-      theme: "white",
-    },
     waitingsUID: [],
     socketID: null,
     lastUsernameUpdate: 0,
+    editedData: false,
   };
 
   const token = await createToken(userData, uid);
@@ -89,6 +93,7 @@ export default async function userRegister(req: Request, res: Response) {
           password: hashedPassword,
           uid: uid,
           refreshToken: refreshToken,
+          notifications: 0,
         } as InfoUserType)
         .then(() => {
           fbFirestore
@@ -98,15 +103,18 @@ export default async function userRegister(req: Request, res: Response) {
             .add({
               time: new Date().getTime(),
               header: "ACCOUNT_REGISTER",
-              data: null,
               icon: null,
-            } as notificationsType);
+            } as notificationsTypeServer);
+
+          const userDataClient = structuredClone(userData);
+          delete (userDataClient as any).subname;
+          delete (userDataClient as any).editedData;
           res.status(200).json({
             status: "ok",
             uid,
             token,
             refreshToken,
-            user: userData,
+            user: userDataClient,
           });
           return;
         })

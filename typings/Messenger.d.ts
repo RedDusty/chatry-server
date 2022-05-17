@@ -10,7 +10,7 @@ type MessageType = {
   existsInDB: boolean;
   editedData?: boolean;
   mid: number;
-  user: UserShortType | "system";
+  user: string | "system";
 };
 
 export type ChatMultipleType = {
@@ -27,7 +27,6 @@ export type ChatMultipleType = {
 
 export type ChatTwoType = {
   cid: string;
-  users: UserShortType[];
   usersUID: string[];
   messagesCount: number;
   chatType: "two-side";

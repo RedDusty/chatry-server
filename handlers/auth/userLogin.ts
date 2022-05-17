@@ -3,6 +3,8 @@ import { createRefreshToken, createToken, verifyToken } from "@utils/token";
 import { Password } from "@utils/password";
 import { getInfoUserDB, getUserDB } from "@database/handlers/getUserDB";
 import { editInfoUser } from "@database/handlers/UserHandler";
+import { UserTypeClient } from "@typings/User";
+import structuredClone from "@utils/structuredClone";
 
 const userLogin = (req: Request, res: Response) => {
   let { username, password, token, uid } = req.body;
@@ -69,12 +71,19 @@ const silentLogin = async (userToken: string, uid: string, res: Response) => {
     const user = await getUserDB("uid", uid);
 
     if (user) {
-      const newToken = await createToken(user, user.uid);
+      if (token.uid === user.uid) {
+        const userClient: UserTypeClient = structuredClone(user);
+        delete (userClient as any).editedData;
+        const newToken = await createToken(userClient, user.uid);
 
-      res.status(200).json({
-        token: newToken,
-        user,
-      });
+        res.status(200).json({
+          token: newToken,
+          user,
+        });
+      } else {
+        res.status(401).send("ACCESS_TOKEN_INVALID");
+        return;
+      }
     } else {
       res.status(404).send("USER_NOT_FOUND");
     }

@@ -21,6 +21,7 @@ export default async function chatCreate(data: chatCreateDataType) {
     editedData: true,
     existsInDB: false,
     messagesCount: 0,
+    usersUID: usersUID,
   };
 
   if (usersUID.length > 2) {
@@ -29,7 +30,6 @@ export default async function chatCreate(data: chatCreateDataType) {
       chatType: "private",
       name: chatName,
       ownerUID: uid,
-      usersUID: usersUID,
     } as ChatMultipleType);
   } else if (usersUID.length === 2) {
     const users = [];
@@ -42,7 +42,6 @@ export default async function chatCreate(data: chatCreateDataType) {
     }
     Object.assign(chatInfo, {
       chatType: "two-side",
-      users: users,
       usersUID: usersUID,
     } as ChatTwoType);
   }
@@ -52,15 +51,19 @@ export default async function chatCreate(data: chatCreateDataType) {
   cache.messages.set(cid, []);
 
   usersUID.forEach((cu: string) => {
-    const userIndex = cache.users.findIndex((u) => u.userUID === cu);
+    const users = cache.users.filter((u) => u.userUID === cu);
 
-    if (userIndex !== -1) {
-      delete (chatInfo as any).editedData;
-      delete (chatInfo as any).existsInDB;
-      io.to(cache.users[userIndex].socketID).emit("CHAT_CLIENT_CREATE", {
-        chatInfo: chatInfo,
-        messages: [],
-      });
+    if (users.length === 1) {
+      const socket = users[0].socketID;
+
+      if (socket) {
+        delete (chatInfo as any).editedData;
+        delete (chatInfo as any).existsInDB;
+        io.to(socket).emit("CHAT_CLIENT_CREATE", {
+          chatInfo: chatInfo,
+          messages: [],
+        });
+      }
     }
   });
 
