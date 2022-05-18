@@ -39,7 +39,7 @@ export type UserTypeServer = {
   email: string;
   uid: string;
   avatar: string | null;
-  online: true | number;
+  online: boolean | number;
   privacy: UserPrivacyType;
   registerDate: number;
   friendsUID: string[];
@@ -57,7 +57,7 @@ export type UserTypeClient = {
   email: string;
   uid: string | null;
   avatar: string | null;
-  online: true | number;
+  online: boolean | number;
   privacy: UserPrivacyType;
   registerDate: number;
   friendsUID: string[];
@@ -83,7 +83,7 @@ type ValueOf<T> = T[keyof T];
 export type UserShortType = {
   username: string;
   uid: string;
-  online: true | number;
+  online: boolean | number;
   avatar: string | null;
   privacy: UserPrivacyType;
 };

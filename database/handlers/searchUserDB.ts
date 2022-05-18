@@ -1,6 +1,7 @@
 import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
 import { UserShortType, UserTypeServer } from "@typings/User";
+import { isOnlineUser } from "./onlineUsers";
 
 export default async function searchUserDB<K extends keyof UserTypeServer>(
   key: K,
@@ -19,20 +20,21 @@ export default async function searchUserDB<K extends keyof UserTypeServer>(
 
   const users: UserShortType[] = [];
 
-  userDocs.docs.forEach((user) => {
+  for (let idx = 0; idx < userDocs.size; idx++) {
+    const user = userDocs.docs[idx];
     const docData = user.data() as UserShortType;
-    if (docData.uid === userUID) return;
+    if (docData.uid === userUID) continue;
 
-    const isOnline = cache.users.findIndex((u) => u.userUID === docData.uid);
+    const isOnline = await isOnlineUser(docData.uid);
 
     users.push({
       avatar: docData.avatar,
       username: docData.username,
-      online: isOnline !== -1 ? true : docData.online,
+      online: isOnline,
       uid: docData.uid,
       privacy: docData.privacy,
     } as UserShortType);
-  });
+  }
 
   return users;
 }

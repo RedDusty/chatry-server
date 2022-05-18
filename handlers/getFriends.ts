@@ -1,4 +1,5 @@
 import { getUserDB } from "@database/handlers/getUserDB";
+import { isOnlineUser } from "@database/handlers/onlineUsers";
 import { UserShortType } from "@typings/User";
 import userShortObj from "@utils/userShortObj";
 import { Request, Response } from "express";
@@ -15,6 +16,8 @@ export default async function getFriends(req: Request, res: Response) {
       const userDB = await getUserDB("uid", uid);
 
       const user = userShortObj(userDB);
+
+      user.online = await isOnlineUser(user.uid);
 
       users.push(user);
     }

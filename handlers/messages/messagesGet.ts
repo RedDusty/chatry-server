@@ -46,9 +46,13 @@ export default async function messagesGet(uid: string, socketID: string) {
       const uidC = chat.usersUID[kdx];
 
       if (usersC.filter((u) => u.uid === uidC).length === 0) {
-        const userC = await getUserDB("uid", uidC);
+        const user = await getUserDB("uid", uidC);
 
-        usersC.push(userShortObj(userC));
+        if (user) {
+          user.online = await isOnlineUser(user.uid);
+
+          usersC.push(userShortObj(user));
+        }
       }
     }
 
@@ -69,9 +73,13 @@ export default async function messagesGet(uid: string, socketID: string) {
           const uidC = chat.usersUID[kdx];
 
           if (usersC.filter((u) => u.uid === uidC).length === 0) {
-            const userC = await getUserDB("uid", uidC);
+            const user = await getUserDB("uid", uidC);
 
-            usersC.push(userShortObj(userC));
+            if (user) {
+              user.online = await isOnlineUser(user.uid);
+
+              usersC.push(userShortObj(user));
+            }
           }
         }
 
@@ -107,9 +115,13 @@ export default async function messagesGet(uid: string, socketID: string) {
         const uidC = chat.usersUID[kdx];
 
         if (usersC.filter((u) => u.uid === uidC).length === 0) {
-          const userC = await getUserDB("uid", uidC);
+          const user = await getUserDB("uid", uidC);
 
-          usersC.push(userShortObj(userC));
+          if (user) {
+            user.online = await isOnlineUser(user.uid);
+
+            usersC.push(userShortObj(user));
+          }
         }
       }
 
@@ -131,7 +143,11 @@ export default async function messagesGet(uid: string, socketID: string) {
         if (usersC.filter((u) => u.uid === uidC).length === 0) {
           const user = await getUserDB("uid", uidC);
 
-          usersC.push(userShortObj(user));
+          if (user) {
+            user.online = await isOnlineUser(user.uid);
+
+            usersC.push(userShortObj(user));
+          }
         }
       }
 
@@ -161,7 +177,11 @@ export default async function messagesGet(uid: string, socketID: string) {
         if (usersC.filter((u) => u.uid === uidC).length === 0) {
           const user = await getUserDB("uid", uidC);
 
-          usersC.push(userShortObj(user));
+          if (user) {
+            user.online = await isOnlineUser(user.uid);
+
+            usersC.push(userShortObj(user));
+          }
         }
       }
 

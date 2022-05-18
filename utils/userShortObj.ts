@@ -14,9 +14,13 @@ export default function userShortObj(
       privacy: user.privacy,
     } as UserShortType;
 
-    const isOnline = cache.users.findIndex((u) => u.userUID === user.uid);
+    const isOnline = cache.users.filter((u) => u.userUID === user.uid);
 
-    rUser.online = isOnline !== -1 ? true : rUser.online;
+    if (isOnline.length === 1) {
+      rUser.online = isOnline[0].info.online;
+    } else {
+      rUser.online = false;
+    }
 
     return rUser;
   } else {

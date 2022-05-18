@@ -4,6 +4,7 @@ import { getUserDB } from "@database/handlers/getUserDB";
 import { UserPrivacyType, UserTypeServer } from "@typings/User";
 import userShortObj from "@utils/userShortObj";
 import { fbFirestore } from "@database/firebase";
+import { isOnlineUser } from "@database/handlers/onlineUsers";
 
 type lastUsernamesType = {
   updateTime: number;
@@ -12,7 +13,7 @@ type lastUsernamesType = {
 
 type UserProileType = {
   username: string;
-  online: number | true;
+  online: number | boolean;
   avatar: string | null;
   privacy: UserPrivacyType;
   uid: string;
@@ -33,9 +34,8 @@ export default async function getUserProfile(req: Request, res: Response) {
     }
 
     if (user) {
-      const isOnline = cache.users.findIndex((u) => u.userUID === user!.uid);
       const userShort = userShortObj(user) as UserProileType;
-      userShort.online = isOnline !== -1 ? true : userShort.online;
+      userShort.online = await isOnlineUser(userShort.uid);
       const lastUsernames = await fbFirestore
         .collection("users")
         .doc(user.uid)
