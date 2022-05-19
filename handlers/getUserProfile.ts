@@ -28,12 +28,16 @@ export default async function getUserProfile(req: Request, res: Response) {
     if (user) {
       const userShort = userShortObj(user) as UserShortType;
       let canView = userShort.privacy.profile === "public";
-      if (userUID === userRequestUID) {
+      const isOwn = user.uid === userRequestUID;
+      if (isOwn) {
         canView = true;
-        return;
       }
-      
-      if (userShort.privacy.profile !== "public" && userRequestUID) {
+
+      if (
+        userShort.privacy.profile !== "public" &&
+        userRequestUID &&
+        isOwn === false
+      ) {
         const userRequest = await getUserDB("uid", userRequestUID);
         if (userShort.privacy.profile === "private") {
           if (userRequest && userRequest.uid) canView = true;
@@ -44,7 +48,7 @@ export default async function getUserProfile(req: Request, res: Response) {
         }
       }
 
-      if (canView === false) {
+      if (canView === false && isOwn === false) {
         let responseTEXT = "FORBIDDEN_PRIVATE";
         if (
           userShort.privacy.profile === "private" &&
@@ -54,7 +58,7 @@ export default async function getUserProfile(req: Request, res: Response) {
         } else if (userShort.privacy.profile === "friends" && userRequestUID) {
           responseTEXT = "FORBIDDEN_FRIEND";
         }
-        
+
         res.status(200).json({
           error: responseTEXT,
           user: {
