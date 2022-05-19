@@ -1,6 +1,6 @@
 type UserPrivacyType = {
-  profile: "public" | "private";
-  messages: "all" | "friends";
+  profile: "public" | "private" | "friends";
+  twoside: "all" | "friends";
 };
 
 type notificationsHeaderFriendType =
@@ -80,10 +80,17 @@ export type InfoUserType = {
 
 type ValueOf<T> = T[keyof T];
 
+
+export type lastUsernamesType = {
+  updateTime: number;
+  username: string;
+};
+
 export type UserShortType = {
   username: string;
   uid: string;
   online: boolean | number;
   avatar: string | null;
   privacy: UserPrivacyType;
+  usernames?: lastUsernamesType[]
 };

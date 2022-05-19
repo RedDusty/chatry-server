@@ -30,7 +30,7 @@ export default function userShortObj(
       online: 0,
       uid: uid,
       privacy: {
-        messages: "all",
+        twoside: "all",
         profile: "public",
       },
     } as UserShortType;

@@ -67,7 +67,7 @@ export default async function userRegister(req: Request, res: Response) {
     friendsUID: [],
     ignoresUID: [],
     privacy: {
-      messages: "all",
+      twoside: "all",
       profile: "public",
     },
     waitingsUID: [],

@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
-import { cache } from "@database/cache";
 import { getUserDB } from "@database/handlers/getUserDB";
-import { UserPrivacyType, UserTypeServer } from "@typings/User";
+import { UserPrivacyType, UserShortType, UserTypeServer } from "@typings/User";
 import userShortObj from "@utils/userShortObj";
 import { fbFirestore } from "@database/firebase";
 import { isOnlineUser } from "@database/handlers/onlineUsers";
@@ -11,17 +10,10 @@ type lastUsernamesType = {
   username: string;
 };
 
-type UserProileType = {
-  username: string;
-  online: number | boolean;
-  avatar: string | null;
-  privacy: UserPrivacyType;
-  uid: string;
-  usernames: lastUsernamesType[];
-};
-
 export default async function getUserProfile(req: Request, res: Response) {
   const userUID = req.query.user;
+  const userRequestUID =
+    req.headers.authorization && req.headers.authorization.split(" ")[0];
 
   if (userUID && typeof userUID === "string") {
     let user = (await getUserDB(
@@ -34,7 +26,48 @@ export default async function getUserProfile(req: Request, res: Response) {
     }
 
     if (user) {
-      const userShort = userShortObj(user) as UserProileType;
+      const userShort = userShortObj(user) as UserShortType;
+      let canView = userShort.privacy.profile === "public";
+      if (userUID === userRequestUID) {
+        canView = true;
+        return;
+      }
+      
+      if (userShort.privacy.profile !== "public" && userRequestUID) {
+        const userRequest = await getUserDB("uid", userRequestUID);
+        if (userShort.privacy.profile === "private") {
+          if (userRequest && userRequest.uid) canView = true;
+        } else if (userShort.privacy.profile === "friends") {
+          canView = userRequest
+            ? userRequest.friendsUID.includes(userShort.uid)
+            : false;
+        }
+      }
+
+      if (canView === false) {
+        let responseTEXT = "FORBIDDEN_PRIVATE";
+        if (
+          userShort.privacy.profile === "private" &&
+          typeof userRequestUID !== "string"
+        ) {
+          responseTEXT = "FORBIDDEN_PRIVATE";
+        } else if (userShort.privacy.profile === "friends" && userRequestUID) {
+          responseTEXT = "FORBIDDEN_FRIEND";
+        }
+        
+        res.status(200).json({
+          error: responseTEXT,
+          user: {
+            uid: userShort.uid,
+            privacy: userShort.privacy,
+            avatar: userShort.avatar,
+            username: userShort.username,
+            online: false,
+          } as UserShortType,
+        });
+        return;
+      }
+
       userShort.online = await isOnlineUser(userShort.uid);
       const lastUsernames = await fbFirestore
         .collection("users")
@@ -45,20 +78,28 @@ export default async function getUserProfile(req: Request, res: Response) {
         .limit(3)
         .get();
 
-      userShort["usernames"] = [];
+      userShort.usernames = [] as lastUsernamesType[];
 
       lastUsernames.forEach((u) => {
-        userShort.usernames.push(u.data() as lastUsernamesType);
+        userShort.usernames!.push(u.data() as lastUsernamesType);
       });
 
-      res.status(200).json(userShort);
+      res.status(200).json({
+        user: userShort,
+      });
       return;
     } else {
-      res.status(404).send("NOT_FOUND");
+      res.status(200).json({
+        error: "NOT_FOUND",
+        user: undefined,
+      });
       return;
     }
   }
 
-  res.status(404).send("NOT_FOUND");
+  res.status(200).json({
+    error: "NOT_FOUND",
+    user: undefined,
+  });
   return;
 }

@@ -1,6 +1,7 @@
 import { cache } from "@database/cache";
 import { fbFirestore } from "@database/firebase";
 import { InfoUserType, UserTypeServer } from "@typings/User";
+import structuredClone from "@utils/structuredClone";
 import { io } from "index";
 
 export const editUser = async <K extends keyof UserTypeServer>(
@@ -17,10 +18,11 @@ export const editUser = async <K extends keyof UserTypeServer>(
     const socket = users[0].socketID;
 
     if (socket) {
-      io.to(socket).emit("USER_EDIT", {
-        key: key,
-        value: value,
-      });
+      const userSend = structuredClone(users[0].info);
+
+      delete (userSend as any).editedData;
+      
+      io.to(socket).emit("USER_EDIT", users[0].info);
     }
   } else {
     const res = await fbFirestore

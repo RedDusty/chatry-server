@@ -25,7 +25,7 @@ export default async function userChangeUsername(data: any, socketID: string) {
   userData.lastUsernameUpdate = lastUsernameUpdate;
 
   const token = await createToken(userData, uid);
-  const refreshToken = await createRefreshToken(userData, uid, false);
+  const refreshToken = await createRefreshToken(userData, uid, true);
 
   let canChange = true;
 
