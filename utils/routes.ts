@@ -10,7 +10,6 @@ import friendRequest from "@handlers/friend/friendRequest";
 import tokenVerify from "./tokenVerify";
 import userLogout from "@handlers/auth/userLogout";
 import getNotifications from "@handlers/getNotifications";
-import getFriends from "@handlers/getFriends";
 import messagesGet from "@handlers/messages/messagesGet";
 import messagesSend from "@handlers/messages/messagesSend";
 import chatCreate from "@handlers/messages/chatCreate";
@@ -19,6 +18,7 @@ import { getUserDB } from "@database/handlers/getUserDB";
 import { io } from "index";
 import { isOnlineUser } from "@database/handlers/onlineUsers";
 import userShortObj from "./userShortObj";
+import userPrivacyChange from "@handlers/userPrivacyChange";
 
 export const expressRoutes = express.Router();
 
@@ -32,7 +32,6 @@ expressRoutes.post("/api/avatar", tokenVerify, userAvatar);
 expressRoutes.get("/api/user", getUserProfile);
 
 expressRoutes.post("/api/search/users", searchUser);
-expressRoutes.post("/api/search/friends", getFriends);
 
 expressRoutes.get("/api/user/get", async (req, res) => {
   const uid = req.query.uid as string;
@@ -57,5 +56,5 @@ export const socketRoutes = (socket: socketType) => {
   socket.on("USER_CHANGE_USERNAME", (data: any) =>
     userChangeUsername(data, socket.id)
   );
-  socket.on("USER_PRIVACY", (data: any) => {});
+  socket.on("USER_PRIVACY", (data: any) => userPrivacyChange(data, socket.id));
 };
