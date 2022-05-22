@@ -41,6 +41,7 @@ const server = http.createServer(app);
 
 export const io = new Server(server, {
   cors: corsConfig,
+  maxHttpBufferSize: 5e6,
 });
 
 io.on("connection", (socket) => {
@@ -50,8 +51,10 @@ io.on("connection", (socket) => {
     addOnlineUser(userUID, socket.id);
   });
   socket.on("disconnect", (reason) => {
-    console.log(`[user_disconnect] - ${socket.id}`);
-    removeOnlineUser(socket.id);
+    console.log("[error] - " + reason);
+    if (reason !== "transport error") {
+      removeOnlineUser(socket.id);
+    }
   });
 });
 
@@ -59,20 +62,20 @@ server.listen(PORT, () => {
   console.log(`[server]: Server running at ${PORT} port`);
 });
 
-// const shedulerUpdateDB = () => {
-//   setTimeout(() => {
-//     updater();
-//     console.log(
-//       "[db update]: next - " +
-//         new Date(new Date().getTime() + 1000 * 60 * 5).toLocaleString()
-//     );
+const shedulerUpdateDB = () => {
+  setTimeout(() => {
+    updater();
+    console.log(
+      "[db update]: next - " +
+        new Date(new Date().getTime() + 1000 * 60 * 1).toLocaleString()
+    );
 
-//     shedulerUpdateDB();
-//   }, 1000 * 60 * 5);
-// };
+    shedulerUpdateDB();
+  }, 1000 * 60 * 1);
+};
 
-// console.log(
-//   "[db update]: first - " +
-//     new Date(new Date().getTime() + 1000 * 60 * 5).toLocaleString()
-// );
-// shedulerUpdateDB();
+console.log(
+  "[db update]: first - " +
+    new Date(new Date().getTime() + 1000 * 60 * 1).toLocaleString()
+);
+shedulerUpdateDB();

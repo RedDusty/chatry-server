@@ -50,6 +50,7 @@ export type UserTypeServer = {
   banned: boolean;
   lastUsernameUpdate: number;
   editedData: boolean;
+  images: string[];
 };
 
 export type UserTypeClient = {
@@ -67,6 +68,7 @@ export type UserTypeClient = {
   socketID: string | null;
   banned: boolean;
   lastUsernameUpdate: number;
+  images: string[];
 };
 
 export type InfoUserType = {

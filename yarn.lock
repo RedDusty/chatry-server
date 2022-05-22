@@ -2000,6 +2000,11 @@ lru-memoizer@^2.1.4:
     lodash.clonedeep "^4.5.0"
     lru-cache "~4.0.0"
 
+magic-bytes.js@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/magic-bytes.js/-/magic-bytes.js-1.0.12.tgz#6287de1070f4c33da4a6e8bffb2752d513a2d287"
+  integrity sha512-Rkukya32FnY3dF5nJeAS4Qcry76tXeOe2sXIQGAt969sV04QLormWHXmHn4o/yIbb4wRlnCqWu8fpVg3TU7sFg==
+
 make-dir@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-3.1.0.tgz#415e967046b3a7f1d185277d84aa58203726a13f"

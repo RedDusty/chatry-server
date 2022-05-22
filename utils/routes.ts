@@ -19,6 +19,7 @@ import { io } from "index";
 import { isOnlineUser } from "@database/handlers/onlineUsers";
 import userShortObj from "./userShortObj";
 import userPrivacyChange from "@handlers/userPrivacyChange";
+import imagesUpload from '@handlers/imagesUpload';
 
 export const expressRoutes = express.Router();
 
@@ -57,4 +58,5 @@ export const socketRoutes = (socket: socketType) => {
     userChangeUsername(data, socket.id)
   );
   socket.on("USER_PRIVACY", (data: any) => userPrivacyChange(data, socket.id));
+  socket.on("IMAGES_UPLOAD", (data: any) => imagesUpload(data, socket.id));
 };

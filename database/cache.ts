@@ -1,29 +1,13 @@
 import { CacheType } from "@typings/Cache";
-import { editInfoUser, editUser } from "@database/handlers/UserHandler";
-import { getUserDB } from "@database/handlers/getUserDB";
-import searchUserDB from "@database/handlers/searchUserDB";
-import {
-  notificationsAddUser,
-  notificationsGetUser,
-} from "@database/handlers/notifications";
 import { MessageType } from "@typings/Messenger";
+import structuredClone from '@utils/structuredClone';
 import { fbFirestore } from "./firebase";
 
 export const cache: CacheType = {
   chats: [],
   messages: new Map(),
   users: [],
-};
-
-export const getDatabase = () => {
-  return {
-    getUser: getUserDB,
-    editUser: editUser,
-    editInfoUser: editInfoUser,
-    searchUser: searchUserDB,
-    notificationsGetUser: notificationsGetUser,
-    notificationsAddUser: notificationsAddUser,
-  };
+  images: [],
 };
 
 export const updater = () => {
@@ -39,7 +23,6 @@ export const updater = () => {
       }
     });
   });
-  
 
   chatsToUpdate.forEach(async (c) => {
     const doc = c;
@@ -79,4 +62,13 @@ export const updater = () => {
         .set(doc, { merge: true });
     }
   });
+
+  const usersToUpdate = cache.users.filter((u) => u.info.editedData === true);
+
+  usersToUpdate.forEach(async (u) => {
+    u.info.editedData = false
+    const doc = structuredClone(u.info);
+
+    await fbFirestore.collection("users").doc(doc.uid).set(doc);
+  })
 };

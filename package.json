@@ -30,6 +30,7 @@
     "firebase": "^9.6.7",
     "firebase-admin": "^10.0.2",
     "jsonwebtoken": "^8.5.1",
+    "magic-bytes.js": "^1.0.12",
     "socket.io": "^4.4.1",
     "ts-node": "^10.5.0",
     "tsconfig-paths": "^3.12.0"

@@ -21,17 +21,21 @@ export const removeOnlineUser = async (socketID?: string, uid?: string) => {
 
     if (indexUser !== -1) {
       const userData = cache.users[indexUser];
+      console.log(`[user_disconnect] - ${userData.userUID} /// ${socketID}`);
 
       userData.info.online = new Date().getTime();
       userData.socketID = null;
+    } else {
+      console.log(`[user_disconnect] - ${socketID}`);
     }
   } else if (uid) {
-    const indexUser = cache.users.findIndex(
-      (user) => user.userUID === uid
-    );
+    const indexUser = cache.users.findIndex((user) => user.userUID === uid);
 
     if (indexUser !== -1) {
       const userData = cache.users[indexUser];
+      console.log(
+        `[user_disconnect] - ${userData.userUID} /// ${userData.socketID}`
+      );
 
       userData.info.online = new Date().getTime();
       userData.socketID = null;

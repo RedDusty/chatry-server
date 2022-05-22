@@ -7,8 +7,14 @@ type UsersCacheType = {
   info: UserTypeServer;
 };
 
+type imageType = {
+  url: string;
+  hash: string;
+};
+
 export type CacheType = {
   chats: ChatType[];
   messages: MessagesType;
   users: UsersCacheType[];
+  images: imageType[];
 };

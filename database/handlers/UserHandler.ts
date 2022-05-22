@@ -22,7 +22,7 @@ export const editUser = async <K extends keyof UserTypeServer>(
 
       delete (userSend as any).editedData;
       
-      io.to(socket).emit("USER_EDIT", users[0].info);
+      io.to(socket).emit("USER_EDIT", userSend);
     }
   } else {
     const res = await fbFirestore

@@ -1,20 +1,15 @@
-import { MessageFileType } from "@typings/Messenger";
-
-const checkFiles = (files: MessageFileType[] | undefined) => {
+const checkFiles = (files: File[] | undefined) => {
   if (files) {
     let isError = false;
     files.every((file) => {
       if (isError) return false;
-      if (typeof file === "object") {
-        if ((file as File).size > 8388608) {
-          isError = true;
-        }
-      } else {
-        return true;
+      if (file.size > 4194304) {
+        isError = true;
       }
     });
 
-    return !isError;
+    if (isError) return false;
+    return true;
   } else return true;
 };
 
