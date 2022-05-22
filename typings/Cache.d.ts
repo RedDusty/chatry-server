@@ -7,9 +7,14 @@ type UsersCacheType = {
   info: UserTypeServer;
 };
 
+type imageExtType = "png" | "jpg" | "jpeg" | "webp" | "gif";
+
 type imageType = {
   url: string;
   hash: string;
+  ext: imageExtType;
+  editedData: boolean;
+  usersUID: string[];
 };
 
 export type CacheType = {

@@ -1,3 +1,5 @@
+import { imageExtType } from "@typings/Cache";
+
 type UserPrivacyType = {
   profile: "public" | "private" | "friends";
   twoside: "all" | "friends";
@@ -33,6 +35,14 @@ type notificationsTypeServer = {
   userUID?: string;
 };
 
+type imageExtType = "png" | "jpg" | "jpeg" | "webp" | "gif";
+
+type imageType = {
+  url: string;
+  hash: string;
+  ext: imageExtType;
+};
+
 export type UserTypeServer = {
   username: string;
   subname: string;
@@ -50,7 +60,7 @@ export type UserTypeServer = {
   banned: boolean;
   lastUsernameUpdate: number;
   editedData: boolean;
-  images: string[];
+  images: imageType[];
 };
 
 export type UserTypeClient = {
@@ -68,7 +78,7 @@ export type UserTypeClient = {
   socketID: string | null;
   banned: boolean;
   lastUsernameUpdate: number;
-  images: string[];
+  images: imageType[];
 };
 
 export type InfoUserType = {
@@ -82,7 +92,6 @@ export type InfoUserType = {
 
 type ValueOf<T> = T[keyof T];
 
-
 export type lastUsernamesType = {
   updateTime: number;
   username: string;
@@ -94,5 +103,5 @@ export type UserShortType = {
   online: boolean | number;
   avatar: string | null;
   privacy: UserPrivacyType;
-  usernames?: lastUsernamesType[]
+  usernames?: lastUsernamesType[];
 };

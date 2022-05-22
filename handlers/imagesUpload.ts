@@ -6,6 +6,8 @@ import { io } from "index";
 import fileType from "magic-bytes.js";
 import { Stream } from "stream";
 import { editUser } from "@database/handlers/UserHandler";
+import { imageType } from "@typings/User";
+import { imageExtType } from "@typings/Cache";
 
 const allowedFiles = [
   "image/png",
@@ -30,11 +32,17 @@ async function imagesUpload(data: any, socketID: string) {
     const filesParsed: number[] = [];
     const uploadedIDs: number[] = [];
     const notUploadedIDs: number[] = [];
-    const urls: string[] = [];
+    const images: imageType[] = [];
 
-    const sendResponse = (uploadID: number, imageURL: string, idx: number) => {
+    const sendResponse = (
+      uploadID: number,
+      imageURL: string,
+      idx: number,
+      hash: string,
+      ext: imageExtType
+    ) => {
       uploadedIDs.push(uploadID);
-      urls.push(imageURL);
+      images.push({ url: imageURL, hash, ext });
       filesParsed.push(idx);
 
       if (filesParsed.length === files.length) {
@@ -43,8 +51,8 @@ async function imagesUpload(data: any, socketID: string) {
             notUploadedIDs.push(f.id);
           }
         });
-        if (urls.length !== 0) {
-          editUser(user.uid, "images", urls);
+        if (images.length !== 0) {
+          editUser(user.uid, "images", images);
         }
         if (notUploadedIDs.length !== 0) {
           io.to(socketID).emit("IMAGE_UPLOAD_CLIENT", {
@@ -64,7 +72,7 @@ async function imagesUpload(data: any, socketID: string) {
       const bufferInfo = fileType(buffer);
 
       if (bufferInfo && bufferInfo[0]) {
-        const fileExt = bufferInfo[0].extension;
+        const fileExt = bufferInfo[0].extension as imageExtType;
         const fileMime = bufferInfo[0].mime;
 
         if (fileExt && fileMime && allowedFiles.includes(fileMime)) {
@@ -76,7 +84,7 @@ async function imagesUpload(data: any, socketID: string) {
           const uploadID = files[idx].id;
 
           if (isExist) {
-            sendResponse(uploadID, isExist.url, idx);
+            sendResponse(uploadID, isExist.url, idx, imageHash, fileExt);
             continue;
           } else {
             try {
@@ -111,9 +119,9 @@ async function imagesUpload(data: any, socketID: string) {
                     "?alt=media&token=" +
                     imageHash;
 
-                  setImageDB(imageHash, user.uid, imageURL);
+                  setImageDB(imageHash, user.uid, imageURL, fileExt);
 
-                  sendResponse(uploadID, imageURL, idx);
+                  sendResponse(uploadID, imageURL, idx, imageHash, fileExt);
                   return;
                 });
               continue;

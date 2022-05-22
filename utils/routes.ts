@@ -1,25 +1,25 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import { socketType } from "custom";
+import { deleteImageUser } from "@database/handlers/imageDB";
+import { getUserDB } from "@database/handlers/getUserDB";
+import { isOnlineUser } from "@database/handlers/onlineUsers";
 import tokenRefresh from "@handlers/auth/tokenRefresh";
 import userAvatar from "@handlers/userAvatar";
 import userLogin from "@handlers/auth/userLogin";
 import userRegister from "@handlers/auth/userRegister";
-import getUserProfile from "@handlers/getUserProfile";
-import searchUser from "@handlers/searchUser";
-import { socketType } from "custom";
-import friendRequest from "@handlers/friend/friendRequest";
-import tokenVerify from "./tokenVerify";
 import userLogout from "@handlers/auth/userLogout";
+import searchUser from "@handlers/searchUser";
+import friendRequest from "@handlers/friend/friendRequest";
+import getUserProfile from "@handlers/getUserProfile";
 import getNotifications from "@handlers/getNotifications";
 import messagesGet from "@handlers/messages/messagesGet";
 import messagesSend from "@handlers/messages/messagesSend";
 import chatCreate from "@handlers/messages/chatCreate";
 import userChangeUsername from "@handlers/userChangeUsername";
-import { getUserDB } from "@database/handlers/getUserDB";
-import { io } from "index";
-import { isOnlineUser } from "@database/handlers/onlineUsers";
-import userShortObj from "./userShortObj";
 import userPrivacyChange from "@handlers/userPrivacyChange";
-import imagesUpload from '@handlers/imagesUpload';
+import imagesUpload from "@handlers/imagesUpload";
+import userShortObj from "@utils/userShortObj";
+import tokenVerify from "@utils/tokenVerify";
 
 export const expressRoutes = express.Router();
 
@@ -59,4 +59,5 @@ export const socketRoutes = (socket: socketType) => {
   );
   socket.on("USER_PRIVACY", (data: any) => userPrivacyChange(data, socket.id));
   socket.on("IMAGES_UPLOAD", (data: any) => imagesUpload(data, socket.id));
+  socket.on("IMAGES_DELETE", (data: any) => deleteImageUser(data, socket.id));
 };
