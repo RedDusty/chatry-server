@@ -2,7 +2,8 @@ import { fbFirestore, fbStorage } from "@database/firebase";
 import { cache } from "@database/cache";
 import { imageExtType, imageType } from "@typings/Cache";
 import { getUserDB } from "@database/handlers/getUserDB";
-import { editUser } from "@database/handlers/UserHandler";
+import structuredClone from "@utils/structuredClone";
+import { io } from "index";
 
 export async function getImageDB(hash: string) {
   const image = cache.images.filter((i) => i.hash === hash);
@@ -94,7 +95,14 @@ export async function deleteImageUser(data: any, socketID: string) {
 
       deleteImageDB(image.hash, user.uid, image.ext);
 
-      editUser(user.uid, "images", images);
+      user.editedData = true;
+      user.images = images;
+
+      const userSend = structuredClone(user);
+
+      delete (userSend as any).editedData;
+
+      io.to(socketID).emit("USER_EDIT", userSend);
     }
   }
 }

@@ -1,11 +1,10 @@
 import { fbStorage } from "@database/firebase";
 import { getImageDB, setImageDB } from "@database/handlers/imageDB";
 import { getUserDB } from "@database/handlers/getUserDB";
-import { createHash, randomUUID } from "crypto";
+import { createHash } from "crypto";
 import { io } from "index";
 import fileType from "magic-bytes.js";
 import { Stream } from "stream";
-import { editUser } from "@database/handlers/UserHandler";
 import { imageType } from "@typings/User";
 import { imageExtType } from "@typings/Cache";
 
@@ -52,7 +51,18 @@ async function imagesUpload(data: any, socketID: string) {
           }
         });
         if (images.length !== 0) {
-          editUser(user.uid, "images", images);
+          let userImages = user.images;
+
+          userImages.push(...images);
+
+          userImages = userImages.filter(
+            (i, idx, self) => idx === self.findIndex((t) => t.hash === i.hash)
+          );
+
+          user.images = userImages;
+          user.editedData = true;
+
+          io.to(socketID).emit("USER_EDIT", user);
         }
         if (notUploadedIDs.length !== 0) {
           io.to(socketID).emit("IMAGE_UPLOAD_CLIENT", {
