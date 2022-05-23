@@ -2,7 +2,6 @@ import { cache } from "@database/cache";
 import { MessageType } from "@typings/Messenger";
 import { io } from "index";
 import structuredClone from "@utils/structuredClone";
-import userShortObj from "@utils/userShortObj";
 
 export default async function messagesSend(data: any, socketID: string) {
   const returnMessageError = () => {
@@ -20,6 +19,9 @@ export default async function messagesSend(data: any, socketID: string) {
 
   message.time = new Date().getTime();
   message.existsInDB = false;
+  if (message.images) {
+    message.images = message.images.slice(0, 5);
+  }
 
   const chat = cache.chats.find((c) => c.cid === message.cid);
 

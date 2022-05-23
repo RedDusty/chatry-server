@@ -1,11 +1,9 @@
 import { UserShortType } from "@typings/User";
 
-type MessageFileType = string | File;
-
 type MessageType = {
   time: number;
   message: string | MessageType;
-  files?: MessageFileType[];
+  images?: string[];
   cid: string;
   existsInDB: boolean;
   editedData?: boolean;
