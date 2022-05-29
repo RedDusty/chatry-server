@@ -1,3 +1,4 @@
+import { cache } from "@database/cache";
 import { getUserDB } from "@database/handlers/getUserDB";
 import { isOnlineUser } from "@database/handlers/onlineUsers";
 import searchUserDB from "@database/handlers/searchUserDB";
@@ -5,13 +6,20 @@ import { UserShortType, UserTypeServer } from "@typings/User";
 import userShortObj from "@utils/userShortObj";
 import { Request, Response } from "express";
 
+export type searchListType =
+  | undefined
+  | "friends"
+  | "waitings"
+  | "search"
+  | "online";
+
 type keyType = "uid" | "username" | "subname";
 
 export default async function searchUser(req: Request, res: Response) {
   const key = req.body.key as keyType;
   const value = req.body.value as string;
   const userUID = req.body.userUID as string;
-  const list = req.body.list as undefined | "friends" | "waitings" | "search";
+  const list = req.body.list as searchListType;
 
   let users: UserShortType[] = [];
   const userRequest = await getUserDB("uid", userUID);
@@ -92,6 +100,33 @@ export default async function searchUser(req: Request, res: Response) {
       res.status(403).send("UNAUTHORIZED");
       return;
     }
+  } else if (list === "online") {
+    cache.users
+      .filter((u) => u.socketID !== null && u.info.privacy.profile === "public")
+      .slice(0, 10)
+      .forEach((u) => {
+        let userOnline = userShortObj(u.info);
+
+        let canView = userOnline.privacy.profile === "public";
+
+        if (userOnline.privacy.profile !== "public" && userUID) {
+          if (userOnline.privacy.profile === "private") {
+            if (userRequest && userRequest.uid) canView = true;
+          } else if (userOnline.privacy.profile === "friends") {
+            canView = userRequest
+              ? userRequest.friendsUID.includes(userOnline.uid)
+              : false;
+          }
+        }
+
+        if (canView === false) {
+          userOnline.online = false;
+          userOnline.usernames = undefined;
+        } else {
+          userOnline.online = true;
+          users.push(userOnline);
+        }
+      });
   }
 
   res.status(200).json(users);
