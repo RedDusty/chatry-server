@@ -11,7 +11,10 @@ type chatCreateDataType = {
   chatName: string;
 };
 
-export default async function chatCreate(data: chatCreateDataType) {
+export default async function chatCreate(
+  data: chatCreateDataType,
+  noEmit?: boolean
+) {
   const { usersUID, uid, chatName } = data;
 
   const cid = crypto.randomUUID();
@@ -50,22 +53,24 @@ export default async function chatCreate(data: chatCreateDataType) {
 
   cache.messages.set(cid, []);
 
-  usersUID.forEach((cu: string) => {
-    const users = cache.users.filter((u) => u.userUID === cu);
+  if (noEmit === undefined || noEmit === false) {
+    usersUID.forEach((cu: string) => {
+      const users = cache.users.filter((u) => u.userUID === cu);
 
-    if (users.length === 1) {
-      const socket = users[0].socketID;
+      if (users.length === 1) {
+        const socket = users[0].socketID;
 
-      if (socket) {
-        delete (chatInfo as any).editedData;
-        delete (chatInfo as any).existsInDB;
-        io.to(socket).emit("CHAT_CLIENT_CREATE", {
-          chatInfo: chatInfo,
-          messages: [],
-        });
+        if (socket) {
+          delete (chatInfo as any).editedData;
+          delete (chatInfo as any).existsInDB;
+          io.to(socket).emit("CHAT_CLIENT_CREATE", {
+            chat: chatInfo,
+            messages: [],
+          });
+        }
       }
-    }
-  });
+    });
+  }
 
   chatInfo["editedData"] = true;
   chatInfo["existsInDB"] = false;

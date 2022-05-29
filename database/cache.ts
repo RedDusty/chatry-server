@@ -71,4 +71,6 @@ export const updater = () => {
 
     await fbFirestore.collection("users").doc(doc.uid).set(doc);
   })
+
+  console.log(`[updater] - ${chatsToUpdate.length} chats / ${messagesToUpdate.length} messages / ${usersToUpdate.length} users updated`)
 };

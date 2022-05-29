@@ -8,8 +8,13 @@ export const addOnlineUser = async (userUID: string, socketID: string) => {
   if (users.length === 1) {
     users[0].socketID = socketID;
     users[0].info.online = true;
+    users[0].info.socketID = socketID;
   } else {
-    cache.users.push({ userUID, socketID, info: { ...user!, online: true } });
+    cache.users.push({
+      userUID,
+      socketID,
+      info: { ...user!, online: true, socketID },
+    });
   }
 };
 
