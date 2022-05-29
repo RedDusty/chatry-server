@@ -102,7 +102,12 @@ export default async function searchUser(req: Request, res: Response) {
     }
   } else if (list === "online") {
     cache.users
-      .filter((u) => u.socketID !== null && u.info.privacy.profile === "public")
+      .filter(
+        (u) =>
+          u.socketID !== null &&
+          u.info.privacy.profile === "public" &&
+          u.info.uid !== userUID
+      )
       .slice(0, 10)
       .forEach((u) => {
         let userOnline = userShortObj(u.info);

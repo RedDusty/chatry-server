@@ -10,6 +10,8 @@ const friendRequest = (data: any) => {
   const senderUID = data.senderUID as string;
   const receiverUID = data.receiverUID as string;
 
+  if (senderUID === receiverUID) return;
+
   if (requestType && senderUID && receiverUID) {
     switch (requestType) {
       case "add":

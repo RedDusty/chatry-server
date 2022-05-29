@@ -20,6 +20,10 @@ export default async function messagesSend(data: any, socketID: string) {
   const uid = data.uid as string;
   const reqUID = data.reqUID as string | undefined;
 
+  if (uid === reqUID) {
+    return
+  }
+
   message.time = new Date().getTime();
   message.existsInDB = false;
   if (message.images) {
