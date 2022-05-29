@@ -9,11 +9,12 @@ export const addOnlineUser = async (userUID: string, socketID: string) => {
     users[0].socketID = socketID;
     users[0].info.online = true;
     users[0].info.socketID = socketID;
+    users[0].info.editedData = true;
   } else {
     cache.users.push({
       userUID,
       socketID,
-      info: { ...user!, online: true, socketID },
+      info: { ...user!, online: true, socketID, editedData: true },
     });
   }
 };
@@ -30,6 +31,7 @@ export const removeOnlineUser = async (socketID?: string, uid?: string) => {
 
       userData.info.online = new Date().getTime();
       userData.socketID = null;
+      userData.info.editedData = true;
     } else {
       console.log(`[user_disconnect] - ${socketID}`);
     }
@@ -44,6 +46,7 @@ export const removeOnlineUser = async (socketID?: string, uid?: string) => {
 
       userData.info.online = new Date().getTime();
       userData.socketID = null;
+      userData.info.editedData = true;
     }
   }
 };
