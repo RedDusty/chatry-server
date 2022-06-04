@@ -2,7 +2,7 @@ import { cache } from "@database/cache";
 import { ChatTwoType } from "@typings/Messenger";
 import { io } from "index";
 import { getUserDB } from "@database/handlers/getUserDB";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import { createRefreshToken, createToken } from "@utils/token";
 import { UserTypeServer } from "@typings/User";
 import { editInfoUser, editUser } from "@database/handlers/UserHandler";
@@ -16,7 +16,7 @@ export default async function userChangeUsername(data: any, socketID: string) {
     "subname",
     String(username).toLowerCase()
   );
-  const doc = await fbFirestore.collection("users").doc(uid).get();
+  const doc = await firestore().collection("users").doc(uid).get();
   const userData = doc.data() as UserTypeServer;
   const prevUsername = userData.username;
   userData.username = String(username);
@@ -75,7 +75,7 @@ export default async function userChangeUsername(data: any, socketID: string) {
     editInfoUser(uid, "subname", String(username).toLowerCase());
     editInfoUser(uid, "refreshToken", refreshToken);
 
-    await fbFirestore
+    await firestore()
       .collection("users")
       .doc(uid)
       .collection("usernames")

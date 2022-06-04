@@ -1,7 +1,6 @@
-import { cache } from "@database/cache";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import { UserShortType, UserTypeServer } from "@typings/User";
-import { isOnlineUser } from "./onlineUsers";
+import { isOnlineUser } from "@database/handlers/onlineUsers";
 
 export default async function searchUserDB<K extends keyof UserTypeServer>(
   key: K,
@@ -11,7 +10,7 @@ export default async function searchUserDB<K extends keyof UserTypeServer>(
   if (key === "subname") {
     value = String(value).toLowerCase();
   }
-  const userDocs = await fbFirestore
+  const userDocs = await firestore()
     .collection("users")
     .where(key, ">=", value)
     .where(key, "<=", value + "\uf8ff")

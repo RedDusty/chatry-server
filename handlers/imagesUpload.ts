@@ -1,4 +1,4 @@
-import { fbStorage } from "@database/firebase";
+import { storage } from "firebase-admin";
 import { getImageDB, setImageDB } from "@database/handlers/imageDB";
 import { getUserDB } from "@database/handlers/getUserDB";
 import { createHash } from "crypto";
@@ -101,7 +101,7 @@ async function imagesUpload(data: any, socketID: string) {
               const stream = new Stream.PassThrough();
               stream.end(Buffer.from(base64, "base64"));
 
-              const bucket = fbStorage.bucket(process.env.FB_STORAGE_BUCKET);
+              const bucket = storage().bucket(process.env.FB_STORAGE_BUCKET);
 
               const file = bucket.file(`images/${imageHash}.${fileExt}`);
 

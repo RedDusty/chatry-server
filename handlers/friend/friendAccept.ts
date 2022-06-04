@@ -2,7 +2,7 @@ import { notificationsAddUser } from "@database/handlers/notifications";
 import { editUser } from "@database/handlers/UserHandler";
 import { notificationsTypeServer, UserTypeServer } from "@typings/User";
 import { ioType } from "custom";
-import { friendAddUser } from "./friendAddUser";
+import { friendAddUser } from "@handlers/friend/friendAddUser";
 
 export const friendAccept = async (
   io: ioType,

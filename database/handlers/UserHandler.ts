@@ -1,5 +1,5 @@
 import { cache } from "@database/cache";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import { InfoUserType, UserTypeServer } from "@typings/User";
 import structuredClone from "@utils/structuredClone";
 import { io } from "index";
@@ -25,7 +25,7 @@ export const editUser = async <K extends keyof UserTypeServer>(
       io.to(socket).emit("USER_EDIT", userSend);
     }
   } else {
-    const res = await fbFirestore
+    const res = await firestore()
       .collection("users")
       .doc(userUID)
       .update({ [key]: value });
@@ -39,7 +39,7 @@ export const editInfoUser = async <K extends keyof InfoUserType>(
   key: K,
   value: InfoUserType[K]
 ) => {
-  const res = await fbFirestore
+  const res = await firestore()
     .collection("Info_Users")
     .doc(userUID)
     .update({ [key]: value });

@@ -1,5 +1,5 @@
 import { cache } from "@database/cache";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import {
   notificationsTypeClient,
   notificationsTypeServer,
@@ -15,7 +15,7 @@ export const notificationsGetUser = async (
 ) => {
   const notifications: notificationsTypeClient[] = [];
 
-  const notifDoc = await fbFirestore
+  const notifDoc = await firestore()
     .collection("Info_Users")
     .doc(userUID)
     .collection("notifications")
@@ -64,7 +64,7 @@ export const notificationsAddUser = async (
   notification: notificationsTypeServer,
   io?: ioType
 ) => {
-  const notifCol = await fbFirestore
+  const notifCol = await firestore()
     .collection("Info_Users")
     .doc(userUID)
     .collection("notifications");
@@ -73,7 +73,7 @@ export const notificationsAddUser = async (
 
   notifCol.add(notification);
 
-  await fbFirestore
+  await firestore()
     .collection("Info_Users")
     .doc(userUID)
     .update({

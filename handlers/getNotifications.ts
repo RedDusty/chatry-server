@@ -1,4 +1,4 @@
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import { notificationsGetUser } from "@database/handlers/notifications";
 import { Request, Response } from "express";
 

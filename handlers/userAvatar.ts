@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { fbStorage } from "@database/firebase";
+import { storage } from "firebase-admin";
 import { Request, Response } from "express";
 import { Stream } from "stream";
 import { UploadedFile } from "express-fileupload";
@@ -28,7 +28,7 @@ export default async function userAvatar(req: Request, res: Response) {
         const stream = new Stream.PassThrough();
         stream.end(Buffer.from(base64, "base64"));
 
-        const bucket = fbStorage.bucket(process.env.FB_STORAGE_BUCKET);
+        const bucket = storage().bucket(process.env.FB_STORAGE_BUCKET);
 
         const file = bucket.file(`users/${userUID}/avatar.png`);
 

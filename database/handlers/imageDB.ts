@@ -1,4 +1,4 @@
-import { fbFirestore, fbStorage } from "@database/firebase";
+import { firestore, storage } from "firebase-admin";
 import { cache } from "@database/cache";
 import { imageExtType, imageType } from "@typings/Cache";
 import { getUserDB } from "@database/handlers/getUserDB";
@@ -11,7 +11,7 @@ export async function getImageDB(hash: string) {
   if (image.length === 1) {
     return image[0];
   } else {
-    const doc = await fbFirestore.collection("images").doc(hash).get();
+    const doc = await firestore().collection("images").doc(hash).get();
 
     if (doc.exists) {
       cache.images.push(doc.data() as imageType);
@@ -28,7 +28,7 @@ export async function setImageDB(
   url: string,
   ext: imageExtType
 ) {
-  await fbFirestore
+  await firestore()
     .collection("images")
     .doc(hash)
     .set({ hash, url, editedData: false, usersUID: [userUID] } as imageType);
@@ -74,9 +74,9 @@ export async function deleteImageDB(
       const idx = cache.images.findIndex((i) => i.hash === hash);
       cache.images.splice(idx, 1);
 
-      await fbFirestore.collection("images").doc(hash).delete();
+      await firestore().collection("images").doc(hash).delete();
 
-      const bucket = fbStorage.bucket(process.env.FB_STORAGE_BUCKET);
+      const bucket = storage().bucket(process.env.FB_STORAGE_BUCKET);
 
       bucket.file(`images/${hash}.${ext}`).delete({ ignoreNotFound: true });
     }

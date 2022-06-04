@@ -1,5 +1,5 @@
 import { cache } from "@database/cache";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import { InfoUserType, UserTypeServer } from "@typings/User";
 
 export async function getUserDB<K extends keyof UserTypeServer>(
@@ -15,7 +15,7 @@ export async function getUserDB<K extends keyof UserTypeServer>(
   if (users.length > 0) {
     return users[0].info;
   } else {
-    const userDocs = await fbFirestore
+    const userDocs = await firestore()
       .collection("users")
       .where(key, "==", value)
       .limit(1)
@@ -48,7 +48,7 @@ export async function getInfoUserDB<K extends keyof InfoUserType>(
   if (key === "subname") {
     value = String(value).toLowerCase() as any;
   }
-  const userDocs = await fbFirestore
+  const userDocs = await firestore()
     .collection("Info_Users")
     .where(key, "==", value)
     .limit(1)

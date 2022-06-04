@@ -1,5 +1,5 @@
 import { cache } from "@database/cache";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import { getUserDB } from "@database/handlers/getUserDB";
 import { ChatType, MessageType } from "@typings/Messenger";
 import { UserShortType, UserTypeServer } from "@typings/User";
@@ -17,13 +17,13 @@ type chatMessagesType = {
 export default async function messagesGet(uid: string, socketID: string) {
   const chatsCached = cache.chats.filter((c) => c.usersUID.includes(uid));
 
-  const chatsMultipleDocsGet = await fbFirestore
+  const chatsMultipleDocsGet = await firestore()
     .collection("chats")
     .where("usersUID", "array-contains", uid)
     .where("chatType", "!=", "two-side")
     .get();
 
-  const chatsTwoSideDocsGet = await fbFirestore
+  const chatsTwoSideDocsGet = await firestore()
     .collection("chats")
     .where("usersUID", "array-contains", uid)
     .where("chatType", "==", "two-side")
@@ -153,7 +153,7 @@ export default async function messagesGet(uid: string, socketID: string) {
 
       messages.push({ cid: chats[idx].cid, messages: cacheMessages });
     } else {
-      const dbMessages = await fbFirestore
+      const dbMessages = await firestore()
         .collection("chats")
         .doc(chats[idx].cid)
         .collection("messages")

@@ -1,7 +1,7 @@
 import { CacheType } from "@typings/Cache";
 import { MessageType } from "@typings/Messenger";
 import structuredClone from '@utils/structuredClone';
-import { fbFirestore } from "./firebase";
+import { firestore } from "firebase-admin";
 
 export const cache: CacheType = {
   chats: [],
@@ -30,10 +30,10 @@ export const updater = () => {
       doc.existsInDB = true;
       doc.editedData = false;
 
-      await fbFirestore.collection("chats").doc(c.cid).set(doc);
+      await firestore().collection("chats").doc(c.cid).set(doc);
     } else if (c.existsInDB === true && c.editedData === true) {
       doc.editedData = false;
-      await fbFirestore
+      await firestore()
         .collection("chats")
         .doc(c.cid)
         .set(doc, { merge: true });
@@ -46,7 +46,7 @@ export const updater = () => {
       doc.editedData = false;
       doc.existsInDB = true;
 
-      await fbFirestore
+      await firestore()
         .collection("chats")
         .doc(m.cid)
         .collection("messages")
@@ -54,7 +54,7 @@ export const updater = () => {
         .set(doc);
     } else if (m.existsInDB === true && m.editedData === true) {
       doc.editedData = false;
-      await fbFirestore
+      await firestore()
         .collection("chats")
         .doc(m.cid)
         .collection("messages")
@@ -69,7 +69,7 @@ export const updater = () => {
     u.info.editedData = false
     const doc = structuredClone(u.info);
 
-    await fbFirestore.collection("users").doc(doc.uid).set(doc);
+    await firestore().collection("users").doc(doc.uid).set(doc);
   })
 
   console.log(`[updater] - ${chatsToUpdate.length} chats / ${messagesToUpdate.length} messages / ${usersToUpdate.length} users updated`)

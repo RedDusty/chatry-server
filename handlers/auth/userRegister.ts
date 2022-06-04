@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Request, Response } from "express";
 import * as crypto from "crypto";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import {
   InfoUserType,
   notificationsTypeServer,
@@ -27,7 +27,7 @@ export default async function userRegister(req: Request, res: Response) {
 
   const hashedPassword: string = await Password.toHash(password);
 
-  const searchUsername = await fbFirestore
+  const searchUsername = await firestore()
     .collection("Info_Users")
     .where("subname", "==", String(username).toLowerCase())
     .get();
@@ -42,7 +42,7 @@ export default async function userRegister(req: Request, res: Response) {
 
   do {
     uid = crypto.randomUUID();
-    const searchUUID = await fbFirestore
+    const searchUUID = await firestore()
       .collection("users")
       .where("uid", "==", uid)
       .get();
@@ -80,12 +80,12 @@ export default async function userRegister(req: Request, res: Response) {
   const token = await createToken(userData, uid);
   const refreshToken = await createRefreshToken(userData, uid, false);
 
-  await fbFirestore
+  await firestore()
     .collection("users")
     .doc(uid)
     .set(userData)
     .then(async () => {
-      await fbFirestore
+      await firestore()
         .collection("Info_Users")
         .doc(uid)
         .set({
@@ -97,7 +97,7 @@ export default async function userRegister(req: Request, res: Response) {
           notifications: 0,
         } as InfoUserType)
         .then(() => {
-          fbFirestore
+          firestore()
             .collection("Info_Users")
             .doc(uid)
             .collection("notifications")

@@ -1,5 +1,5 @@
 import { cache } from "@database/cache";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import { ChatType, MessageType } from "@typings/Messenger";
 import checkFiles from "@utils/checkFiles";
 import { notificationsAddUser } from "@database/handlers/notifications";

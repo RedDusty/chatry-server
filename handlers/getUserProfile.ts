@@ -5,7 +5,7 @@ import {
   UserTypeServer,
   lastUsernamesType,
 } from "@typings/User";
-import { fbFirestore } from "@database/firebase";
+import { firestore } from "firebase-admin";
 import { isOnlineUser } from "@database/handlers/onlineUsers";
 import { imageType } from '@typings/User';
 
@@ -87,7 +87,7 @@ export default async function getUserProfile(req: Request, res: Response) {
       }
 
       userProfile.online = await isOnlineUser(userProfile.uid);
-      const lastUsernames = await fbFirestore
+      const lastUsernames = await firestore()
         .collection("users")
         .doc(user.uid)
         .collection("usernames")
