@@ -44,12 +44,14 @@ const loginSystem = async (
         const refreshToken = await createRefreshToken(user, user.uid, true);
 
         editInfoUser(user.uid, "refreshToken", refreshToken);
+        const userDataClient = structuredClone(user);
+        delete (userDataClient as any).editedData;
 
         res.status(200).json({
           uid: user.uid,
           token,
           refreshToken,
-          user,
+          user: userDataClient,
         });
       } else {
         res.status(404).send("USER_NOT_FOUND");

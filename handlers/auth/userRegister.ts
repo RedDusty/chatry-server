@@ -108,7 +108,6 @@ export default async function userRegister(req: Request, res: Response) {
             } as notificationsTypeServer);
 
           const userDataClient = structuredClone(userData);
-          delete (userDataClient as any).subname;
           delete (userDataClient as any).editedData;
           res.status(200).json({
             status: "ok",
